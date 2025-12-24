@@ -1,0 +1,901 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Recetario de Mamita Margarita</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Lato:wght@300;400;700&family=Lora:ital,wght@0,400;0,500;0,600;1,400;1,500&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+
+    <!-- React & ReactDOM -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.production.min.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.production.min.js"></script>
+    
+    <!-- Babel for JSX -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* Optimizaciones de CSS */
+        body {
+            -webkit-tap-highlight-color: transparent;
+            overscroll-behavior-y: none;
+            text-rendering: optimizeLegibility;
+        }
+        
+        .bg-paper {
+            background-color: #fff1f2;
+            background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e11d48' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        /* Nueva trama RF para el menú compartir con MAYOR CONTRASTE */
+        .bg-rf-pattern {
+            background-color: #fff1f2;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='30' y='30' font-family='serif' font-size='14' fill='%23be123c' fill-opacity='0.12' text-anchor='middle' dominant-baseline='middle' transform='rotate(-15 30 30)'%3ERF%3C/text%3E%3C/svg%3E");
+        }
+
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+        .animate-spin-slow { animation: spin 20s linear infinite; }
+
+        @keyframes fadeIn { 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
+        }
+        .animate-fade-in { 
+            animation: fadeIn 0.25s ease-out forwards; 
+            will-change: transform, opacity;
+        }
+        
+        .layer-optimize {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
+        }
+    </style>
+</head>
+<body class="bg-paper text-stone-700 antialiased selection:bg-rose-200 selection:text-rose-900">
+    <div id="root"></div>
+
+    <script type="text/babel">
+        const { useState, useEffect, useMemo, memo, useRef, useCallback } = React;
+
+        // --- SISTEMA DE DISEÑO OPTIMIZADO ---
+        // Sombra más simple para mejor rendimiento en scroll
+        const cardBaseStyle = "bg-white/95 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-200 transition-transform duration-200 ease-out active:scale-[0.98] overflow-hidden relative layer-optimize";
+        
+        const fontTitle = "font-['Playfair_Display']"; 
+        const fontBody = "font-['Lora']";             
+        const fontScript = "font-['Great_Vibes']";    
+
+        // --- ICONOS DE INTERFAZ (MEMOIZADOS) ---
+        const ClockIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ));
+        const UsersIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ));
+        const ArrowLeftIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> ));
+        const SearchIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg> ));
+        const GridIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> ));
+        const ListIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> ));
+        const ChevronRightIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg> ));
+        const ShareIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> ));
+        const HeartHandIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.28 3.6-2.34 4.58-2.74a2 2 0 0 0 1.24-2.57 2 2 0 0 0-2.6-1.2c-1.55.5-3.8 1.4-5.22 2.51"></path><path d="M22 6a3 3 0 1 0-6 0c0 1.66 1.12 3.01 2.5 3.5"></path><path d="M2.5 10.5C2.5 8 4.5 6 7 6a4.5 4.5 0 0 1 4 3 4.5 4.5 0 0 1 4-3c2.5 0 4.5 2 4.5 4.5 0 3.5-3.5 5.5-8.5 11C6 16 2.5 14 2.5 10.5Z"></path></svg> ));
+        const ImageIcon = memo(({ size = 64, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> ));
+
+        // --- ICONOS DECORATIVOS BASE MEMOIZADOS ---
+        const GeraniumIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="gradPetal" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style={{ stopColor: '#fb7185', stopOpacity: 1 }} /><stop offset="100%" style={{ stopColor: '#e11d48', stopOpacity: 1 }} /></radialGradient></defs>
+            <path d="M20 70 C10 50, 40 40, 50 60 C60 40, 90 50, 80 70 C70 90, 30 90, 20 70 Z" fill="#86efac" stroke="#4ade80" strokeWidth="1.5"/>
+            <path d="M50 60 L50 85" stroke="#4ade80" strokeWidth="2" strokeLinecap="round"/>
+            <g transform="translate(50, 35)"><circle cx="0" cy="0" r="14" fill="url(#gradPetal)" stroke="#fff" strokeWidth="0.5" /><path d="M-5 -5 L5 5 M-5 5 L5 -5" stroke="#fcd34d" strokeWidth="1.5" /><circle cx="0" cy="0" r="3" fill="#fef08a" /></g>
+            <g transform="translate(28, 30)"><circle cx="0" cy="0" r="11" fill="#fda4af" stroke="#fff" strokeWidth="0.5"/><circle cx="0" cy="0" r="2" fill="#fef08a" /></g>
+             <g transform="translate(72, 30)"><circle cx="0" cy="0" r="11" fill="#fda4af" stroke="#fff" strokeWidth="0.5"/><circle cx="0" cy="0" r="2" fill="#fef08a" /></g>
+            <g transform="translate(50, 15)"><circle cx="0" cy="0" r="10" fill="#fecdd3" stroke="#fff" strokeWidth="0.5"/></g>
+             <g transform="translate(35, 20)"><circle cx="0" cy="0" r="9" fill="#f43f5e" stroke="#fff" strokeWidth="0.5"/></g>
+             <g transform="translate(65, 20)"><circle cx="0" cy="0" r="9" fill="#f43f5e" stroke="#fff" strokeWidth="0.5"/></g>
+          </svg>
+        ));
+
+        const DaisyIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><radialGradient id="gradDaisy" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style={{ stopColor: '#fef3c7', stopOpacity: 1 }} /><stop offset="100%" style={{ stopColor: '#fcd34d', stopOpacity: 1 }} /></radialGradient></defs>
+            <g fill="#fff" stroke="#e5e7eb" strokeWidth="1">
+              <ellipse cx="50" cy="20" rx="6" ry="14" transform="rotate(0 50 20)"/>
+              <ellipse cx="50" cy="80" rx="6" ry="14" transform="rotate(0 50 80)"/>
+              <ellipse cx="20" cy="50" rx="14" ry="6" transform="rotate(0 20 50)"/>
+              <ellipse cx="80" cy="50" rx="14" ry="6" transform="rotate(0 80 50)"/>
+              <ellipse cx="29" cy="29" rx="6" ry="14" transform="rotate(-45 29 29)"/>
+              <ellipse cx="71" cy="29" rx="6" ry="14" transform="rotate(45 71 29)"/>
+              <ellipse cx="29" cy="71" rx="6" ry="14" transform="rotate(45 29 71)"/>
+              <ellipse cx="71" cy="71" rx="6" ry="14" transform="rotate(-45 71 71)"/>
+            </g>
+            <circle cx="50" cy="50" r="10" fill="url(#gradDaisy)" stroke="#f59e0b" strokeWidth="1"/>
+          </svg>
+        ));
+
+        const GrandpaHatIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs><linearGradient id="hatGradient" x1="0%" y1="0%" x2="0%" y2="100%"><stop offset="0%" style={{ stopColor: '#b45309', stopOpacity: 1 }} /><stop offset="100%" style={{ stopColor: '#78350f', stopOpacity: 1 }} /></linearGradient></defs>
+            <ellipse cx="50" cy="82" rx="42" ry="6" fill="#000" fillOpacity="0.2"/>
+            <path d="M5 65 C5 65, 25 85, 50 85 C75 85, 95 65, 95 65 C95 65, 75 75, 50 75 C25 75, 5 65, 5 65 Z" fill="#b45309" stroke="#78350f" strokeWidth="1"/>
+            <path d="M25 65 L28 35 C28 35, 32 20, 50 20 C68 20, 72 35, 72 35 L75 65 Z" fill="url(#hatGradient)" stroke="#78350f" strokeWidth="1"/>
+            <path d="M25 60 C25 60, 50 70, 75 60 L76 50 C76 50, 50 60, 24 50 Z" fill="#451a03"/>
+            <path d="M40 28 Q50 35 60 28" fill="none" stroke="#78350f" strokeWidth="1" opacity="0.5"/>
+          </svg>
+        ));
+
+        const ThreadIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <ellipse cx="50" cy="85" rx="28" ry="5" fill="#000" fillOpacity="0.15"/>
+            <path d="M25 40 C15 50, 15 70, 25 80 Q50 95 75 80 C85 70, 85 50, 75 40 Q50 20 25 40" fill="#fbcfe8" stroke="#db2777" strokeWidth="1.5"/>
+            <path d="M30 45 Q50 60 70 45" fill="none" stroke="#db2777" strokeWidth="1" opacity="0.6"/>
+            <path d="M28 55 Q50 70 72 55" fill="none" stroke="#db2777" strokeWidth="1" opacity="0.6"/>
+            <path d="M30 65 Q50 80 70 65" fill="none" stroke="#db2777" strokeWidth="1" opacity="0.6"/>
+            <path d="M32 75 Q50 88 68 75" fill="none" stroke="#db2777" strokeWidth="1" opacity="0.6"/>
+            <path d="M15 85 L85 15" stroke="#d4a373" strokeWidth="4" strokeLinecap="round"/>
+            <circle cx="15" cy="85" r="5" fill="#a98467"/>
+            <path d="M42 35 L58 35 L62 85 L38 85 Z" fill="#fff" opacity="0.95" stroke="#9d174d" strokeWidth="1"/>
+            <text x="50" y="65" fontSize="10" textAnchor="middle" fill="#9d174d" fontFamily="serif" fontWeight="bold" transform="rotate(-4 50 60)">LANA</text>
+            <path d="M72 50 Q90 50 85 80" fill="none" stroke="#fbcfe8" strokeWidth="3" strokeLinecap="round"/>
+          </svg>
+        ));
+
+        // --- ICONO: Familia Rivera-Fierro (RF) ---
+        const FamilyIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <defs>
+              <linearGradient id="goldGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                 <stop offset="0%" style={{ stopColor: '#fcd34d', stopOpacity: 1 }} />
+                 <stop offset="100%" style={{ stopColor: '#d97706', stopOpacity: 1 }} />
+              </linearGradient>
+            </defs>
+            <circle cx="50" cy="50" r="42" fill="#fff1f2" stroke="url(#goldGrad)" strokeWidth="2"/>
+            <circle cx="50" cy="50" r="38" fill="none" stroke="#fecdd3" strokeWidth="1" strokeDasharray="4 2"/>
+            <text x="50" y="62" fontSize="36" textAnchor="middle" fill="#9f1239" fontFamily="'Playfair Display', serif" fontWeight="bold" style={{ textShadow: "1px 1px 0px rgba(254, 205, 211, 0.8)" }}>RF</text>
+            <path d="M30 75 Q50 85 70 75" fill="none" stroke="#d97706" strokeWidth="1" strokeLinecap="round" opacity="0.6"/>
+            <path d="M40 25 Q50 15 60 25" fill="none" stroke="#d97706" strokeWidth="1" strokeLinecap="round" opacity="0.6"/>
+          </svg>
+        ));
+
+        const WheatIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M50 95 Q50 50 30 20" stroke="#d97706" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            <path d="M50 95 Q50 50 70 20" stroke="#d97706" strokeWidth="3" fill="none" strokeLinecap="round"/>
+            <g fill="#fbbf24" stroke="#d97706" strokeWidth="1">
+                <ellipse cx="30" cy="20" rx="5" ry="10" transform="rotate(-20 30 20)"/>
+                <ellipse cx="35" cy="30" rx="5" ry="10" transform="rotate(-15 35 30)"/>
+                <ellipse cx="25" cy="30" rx="5" ry="10" transform="rotate(-25 25 30)"/>
+                <ellipse cx="40" cy="40" rx="5" ry="10" transform="rotate(-10 40 40)"/>
+                
+                <ellipse cx="70" cy="20" rx="5" ry="10" transform="rotate(20 70 20)"/>
+                <ellipse cx="65" cy="30" rx="5" ry="10" transform="rotate(15 65 30)"/>
+                <ellipse cx="75" cy="30" rx="5" ry="10" transform="rotate(25 75 30)"/>
+                <ellipse cx="60" cy="40" rx="5" ry="10" transform="rotate(10 60 40)"/>
+            </g>
+          </svg>
+        ));
+
+        const SoupIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M15 45 Q15 85 50 85 Q85 85 85 45 L85 40 L15 40 Z" fill="#c2410c" stroke="#7c2d12" strokeWidth="2"/>
+            <ellipse cx="50" cy="40" rx="35" ry="8" fill="#fdba74" stroke="#7c2d12" strokeWidth="2"/>
+            <ellipse cx="50" cy="40" rx="30" ry="6" fill="#ffedd5" opacity="0.9"/>
+            <circle cx="35" cy="40" r="3" fill="#bef264"/>
+            <circle cx="65" cy="40" r="3" fill="#bef264"/>
+            <rect x="45" y="38" width="6" height="6" fill="#f97316"/>
+            <path d="M10 50 H15" stroke="#7c2d12" strokeWidth="5" strokeLinecap="round"/>
+            <path d="M85 50 H90" stroke="#7c2d12" strokeWidth="5" strokeLinecap="round"/>
+            <path d="M35 25 Q40 15 45 25" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" opacity="0.5"/>
+            <path d="M50 20 Q55 10 60 20" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" opacity="0.7"/>
+            <path d="M65 25 Q70 15 75 25" stroke="#94a3b8" strokeWidth="3" strokeLinecap="round" opacity="0.5"/>
+          </svg>
+        ));
+
+        const UtensilsIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+             <circle cx="50" cy="50" r="45" fill="#f8fafc" stroke="#cbd5e1" strokeWidth="2"/>
+             <circle cx="50" cy="50" r="30" fill="none" stroke="#cbd5e1" strokeWidth="1"/>
+            <path d="M70 30 Q80 30 80 45 Q80 60 70 60 Q60 60 60 45 Q60 30 70 30" fill="#d1d5db" stroke="#6b7280" strokeWidth="2"/>
+            <path d="M70 60 L60 85" stroke="#6b7280" strokeWidth="4" strokeLinecap="round"/>
+            <path d="M40 30 L40 50 Q40 60 50 60" fill="none" stroke="#6b7280" strokeWidth="2"/>
+            <path d="M50 30 L50 50" fill="none" stroke="#6b7280" strokeWidth="2"/>
+            <path d="M30 30 L30 50 Q30 60 40 60" fill="none" stroke="#6b7280" strokeWidth="2"/>
+            <path d="M40 60 L30 85" stroke="#6b7280" strokeWidth="4" strokeLinecap="round"/>
+          </svg>
+        ));
+
+        const CookieIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="45" cy="55" r="28" fill="#d4a373" stroke="#854d0e" strokeWidth="2"/>
+            <circle cx="35" cy="45" r="3" fill="#5c3a21"/>
+            <circle cx="55" cy="50" r="4" fill="#5c3a21"/>
+            <circle cx="45" cy="70" r="3" fill="#5c3a21"/>
+            <circle cx="30" cy="60" r="2" fill="#5c3a21"/>
+            <circle cx="40" cy="55" r="2" fill="#5c3a21"/>
+            <path d="M75 35 L85 25 M65 45 L55 55" stroke="#9f1239" strokeWidth="3" strokeLinecap="round"/>
+            <circle cx="70" cy="40" r="10" fill="#f43f5e" stroke="#9f1239" strokeWidth="1.5"/>
+            <path d="M68 38 Q72 35 74 38" stroke="#fff" strokeWidth="1.5" fill="none" opacity="0.6"/>
+          </svg>
+        ));
+
+        const DrinkIcon = memo(({ className }) => (
+          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M35 25 L25 55 Q20 75 30 90 Q40 98 60 98 Q80 98 90 90 Q100 75 95 55 L85 25 Z" fill="#b45309" stroke="#78350f" strokeWidth="2"/>
+            <ellipse cx="60" cy="25" rx="25" ry="8" fill="#78350f"/>
+            <ellipse cx="60" cy="25" rx="22" ry="6" fill="#fcd34d"/>
+            <path d="M35 55 Q40 75 50 80" stroke="#fff" strokeWidth="2" fill="none" opacity="0.2"/>
+             <path d="M30 55 Q60 65 90 55" fill="none" stroke="#fbbf24" strokeWidth="3" strokeDasharray="5,5"/>
+          </svg>
+        ));
+
+        // --- ICONOS ESPECÍFICOS DE RECETA (MEMOIZADOS) ---
+        const CornSackIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 85 Q25 95 35 95 H65 Q75 95 75 85 V45 Q75 25 50 25 Q25 25 25 45 Z" fill="#fde047" stroke="#b45309" strokeWidth="2"/><path d="M25 45 Q50 55 75 45" stroke="#b45309" strokeWidth="2" fill="none"/><path d="M35 25 L30 10 Q50 0 70 10 L65 25" fill="#fbbf24" stroke="#b45309"/><text x="50" y="75" fontSize="10" textAnchor="middle" fill="#b45309" fontWeight="bold" fontFamily="serif">MAÍZ</text><circle cx="40" cy="60" r="1.5" fill="#b45309"/><circle cx="60" cy="55" r="1.5" fill="#b45309"/></svg> ));
+        const MachicaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50 L90 45 L10 45 Z" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/><path d="M15 45 Q50 20 85 45" fill="#fcd34d" stroke="#b45309" strokeWidth="2"/><circle cx="40" cy="40" r="1.5" fill="#b45309" opacity="0.6"/><circle cx="60" cy="35" r="1.5" fill="#b45309" opacity="0.6"/><circle cx="50" cy="30" r="1.5" fill="#b45309" opacity="0.6"/><path d="M20 50 Q50 60 80 50" stroke="#c2410c" strokeWidth="1" fill="none" opacity="0.3"/></svg> ));
+        const TamalIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 55 Q50 85 85 55 Q50 25 15 55 Z" fill="#bef264" stroke="#4d7c0f" strokeWidth="2"/><path d="M15 55 L85 55" stroke="#4d7c0f" strokeWidth="1" opacity="0.5"/><path d="M48 45 L52 65" stroke="#4d7c0f" strokeWidth="2"/><path d="M52 45 L48 65" stroke="#4d7c0f" strokeWidth="2"/><path d="M15 55 Q30 45 45 45" stroke="#4d7c0f" strokeWidth="1" fill="none" opacity="0.5"/></svg> ));
+        const ChiguilIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 50 Q50 15 75 50 Q50 85 25 50 Z" fill="#fef08a" stroke="#d97706" strokeWidth="2"/><path d="M25 50 Q50 50 75 50" stroke="#d97706" strokeWidth="1" fill="none"/><path d="M25 50 Q35 30 50 30" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/><path d="M75 50 Q65 70 50 70" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/></svg> ));
+        const BunuelosIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><circle cx="65" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><circle cx="50" cy="35" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><path d="M50 15 Q50 35 35 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/><path d="M50 15 Q60 35 65 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/><circle cx="50" cy="15" r="3" fill="#713f12"/></svg> ));
+        const TortillasIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="55" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="45" rx="35" ry="12" fill="#fcd34d" stroke="#d97706" strokeWidth="2"/><path d="M30 45 Q40 50 50 45" stroke="#b45309" strokeWidth="2" opacity="0.6"/><path d="M60 42 Q65 48 70 42" stroke="#b45309" strokeWidth="2" opacity="0.6"/></svg> ));
+        const CaldoBolasIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="8" fill="#ffedd5" stroke="#c2410c" strokeWidth="2"/><circle cx="50" cy="45" r="14" fill="#fcd34d" stroke="#d97706" strokeWidth="1.5"/><circle cx="50" cy="45" r="4" fill="#fb923c" opacity="0.6"/><path d="M35 48 Q40 52 45 48" stroke="#d97706" fill="none" opacity="0.5"/></svg> ));
+        const ColadaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 30 L32 80 Q32 90 50 90 Q68 90 68 80 L70 30 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="30" rx="20" ry="5" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><path d="M40 20 Q45 10 50 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/><path d="M55 20 Q60 10 65 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/><path d="M35 80 Q50 85 65 80" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.3"/></svg> ));
+        const FanescaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fff7ed" stroke="#ea580c" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="10" fill="#ffedd5" stroke="#ea580c" strokeWidth="2"/><path d="M35 45 Q50 35 65 45 Q50 55 35 45" fill="#94a3b8" stroke="#475569"/><circle cx="30" cy="52" r="3" fill="#bef264" stroke="#4d7c0f"/><circle cx="70" cy="48" r="3" fill="#fca5a5" stroke="#b91c1c"/><circle cx="50" cy="55" r="3" fill="#fcd34d" stroke="#d97706"/></svg> ));
+        const TurkeyIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="60" rx="35" ry="25" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><ellipse cx="50" cy="55" rx="25" ry="15" fill="#fcd34d" opacity="0.5"/><path d="M82 60 Q92 60 92 70 Q92 80 80 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><path d="M18 60 Q8 60 8 70 Q8 80 20 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><path d="M35 50 Q50 35 65 50" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/><path d="M40 70 Q50 75 60 70" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/></svg> ));
+        const HumitaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 35 L50 85 L75 35" fill="#bef264" stroke="#365314" strokeWidth="2"/><path d="M25 35 Q50 55 75 35" fill="#d9f99d" stroke="#365314" strokeWidth="2"/><path d="M40 60 L60 60" stroke="#365314" strokeWidth="2"/><path d="M50 60 L50 65" stroke="#365314" strokeWidth="2"/></svg> ));
+        const QuimbolitoIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="35" width="50" height="35" rx="4" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2"/><path d="M25 35 L50 55 L75 35" fill="#bae6fd" stroke="#0284c7" strokeWidth="1.5"/><path d="M50 55 L50 70" stroke="#0284c7" strokeWidth="1.5" strokeDasharray="3 2"/><circle cx="50" cy="45" r="2" fill="#0284c7" opacity="0.5"/></svg> ));
+        const JuchoIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fce7f3" stroke="#be185d" strokeWidth="2"/><ellipse cx="50" cy="45" rx="30" ry="6" fill="#fbcfe8" stroke="#be185d" strokeWidth="2"/><circle cx="42" cy="50" r="5" fill="#4c0519" stroke="none"/><circle cx="58" cy="48" r="5" fill="#4c0519" stroke="none"/><circle cx="50" cy="55" r="6" fill="#fde047" stroke="#b45309"/></svg> ));
+        const RiceIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="70" rx="40" ry="12" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2"/><path d="M30 65 Q50 30 70 65" fill="#fff" stroke="#d1d5db" strokeWidth="2"/><circle cx="50" cy="45" r="2" fill="#fbbf24"/><path d="M40 55 L50 45 L60 55" fill="none" stroke="#d1d5db" strokeWidth="1"/></svg> ));
+        const PumpkinIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="45" rx="30" ry="6" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/><rect x="42" y="40" width="8" height="8" fill="#fb923c" stroke="#c2410c"/><rect x="52" y="38" width="6" height="6" fill="#fb923c" stroke="#c2410c"/></svg> ));
+        const ChichaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35 30 L25 60 Q20 85 50 85 Q80 85 75 60 L65 30 Z" fill="#b45309" stroke="#78350f" strokeWidth="2"/><ellipse cx="50" cy="30" rx="15" ry="4" fill="#78350f"/><ellipse cx="50" cy="30" rx="13" ry="3" fill="#fcd34d"/><path d="M30 60 Q50 70 70 60" stroke="#fcd34d" strokeWidth="2" fill="none" strokeDasharray="3 3"/></svg> ));
+        const CarlotaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 80 L25 30 H75 L70 80 Q50 90 30 80 Z" fill="#fef9c3" stroke="#facc15" strokeWidth="2"/><ellipse cx="50" cy="30" rx="25" ry="5" fill="#fff" stroke="#facc15" strokeWidth="2"/><path d="M50 25 L50 10 L60 15 L50 25" fill="#4ade80" stroke="#166534"/><path d="M50 25 L50 10 L40 15 L50 25" fill="#4ade80" stroke="#166534"/></svg> ));
+        const SausageIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 50 Q50 25 80 50 Q80 75 50 75 Q20 75 20 50" fill="#44403c" stroke="#1c1917" strokeWidth="2"/><path d="M25 50 Q50 35 75 50" stroke="#78716c" strokeWidth="2" fill="none" opacity="0.4"/><path d="M18 50 L12 50" stroke="#1c1917" strokeWidth="2"/><path d="M82 50 L88 50" stroke="#1c1917" strokeWidth="2"/><circle cx="30" cy="55" r="1" fill="#fff" opacity="0.3"/><circle cx="70" cy="60" r="1" fill="#fff" opacity="0.3"/></svg> ));
+        const PozoleIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 55 Q15 90 50 90 Q85 90 85 55 L90 50 L10 50 Z" fill="#b91c1c" stroke="#7f1d1d" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="10" fill="#fecaca" stroke="#7f1d1d" strokeWidth="2"/><ellipse cx="50" cy="50" rx="30" ry="8" fill="#991b1b" opacity="0.9"/><circle cx="40" cy="52" r="4" fill="#fef08a"/><circle cx="60" cy="48" r="4" fill="#fef08a"/><path d="M35 30 Q40 20 45 30" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/><path d="M50 25 Q55 15 60 25" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/></svg> ));
+        const CakeSliceIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 40 L50 20 L80 40" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><path d="M20 40 L50 60 L80 40 L80 70 L50 90 L20 70 Z" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/><path d="M20 50 L50 70 L80 50" fill="none" stroke="#d97706" strokeWidth="1" strokeDasharray="2 2"/><circle cx="50" cy="25" r="4" fill="#ef4444" stroke="#b91c1c"/><path d="M50 25 L55 15" stroke="#15803d" strokeWidth="1"/></svg> ));
+        const PassionFruitMousseIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 30 L35 70 Q35 80 50 80 Q65 80 65 70 L70 30" fill="#fef9c3" stroke="#fbbf24" strokeWidth="2" opacity="0.9"/><path d="M50 80 V95 M35 95 H65" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round"/><path d="M30 30 Q50 40 70 30" fill="#fff" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/><circle cx="45" cy="25" r="2" fill="#000"/><circle cx="55" cy="22" r="2" fill="#000"/><circle cx="50" cy="28" r="2" fill="#000"/><path d="M35 25 Q50 10 65 25" fill="#fcd34d" stroke="none" opacity="0.8"/></svg> ));
+
+        const ICON_MAP = {
+            1: CornSackIcon, 2: MachicaIcon, 3: TamalIcon, 4: ChiguilIcon, 5: BunuelosIcon, 6: TortillasIcon, 7: CaldoBolasIcon, 8: ColadaIcon, 9: FanescaIcon, 10: TurkeyIcon, 11: HumitaIcon, 12: QuimbolitoIcon, 13: JuchoIcon, 14: RiceIcon, 15: PumpkinIcon, 16: ChichaIcon, 17: CarlotaIcon, 18: SausageIcon, 19: PozoleIcon, 20: CakeSliceIcon, 21: PassionFruitMousseIcon
+        };
+
+        const RecipeSpecificIcon = memo(({ recipe, className }) => {
+            const IconComponent = ICON_MAP[recipe.id] || GeraniumIcon;
+            return <IconComponent className={className} />;
+        });
+
+        const CategoryIcon = memo(({ category, className, author }) => {
+          if (author === "Papi Gonzalo") return <GrandpaHatIcon className={className} />;
+          if (author === "Tía Lolita" || author === "Tía Teresita") return <ThreadIcon className={className} />;
+          if (["Familia Rivera-Fierro", "Danny y Ana", "Lolita"].includes(author)) return <FamilyIcon className={className} />;
+          if (author === "Magyta") return <DaisyIcon className={className} />;
+          switch (category) {
+            case 'Harinas': return <WheatIcon className={className} />;
+            case 'Sopas': return <SoupIcon className={className} />;
+            case 'Dulces': return <CookieIcon className={className} />;
+            case 'Salados': return <UtensilsIcon className={className} />;
+            case 'Bebidas': return <DrinkIcon className={className} />;
+            default: return <GeraniumIcon className={className} />;
+          }
+        });
+
+        // --- HELPER TEXTO ---
+        const renderInstruction = (text) => {
+          const parts = text.split(':');
+          if (parts.length > 1 && parts[0].length < 50) { 
+            return (
+              <div className="mb-2">
+                <span className={`block text-xl font-bold text-rose-900 mb-1 leading-normal ${fontTitle}`}>{parts[0]}</span>
+                <span className={`text-stone-700 block leading-relaxed ${fontBody}`}>{parts.slice(1).join(':')}</span>
+              </div>
+            );
+          }
+          return <span className={`text-stone-700 leading-relaxed block ${fontBody}`}>{text}</span>;
+        };
+
+        // --- DATOS DE RECETAS ---
+        const recipesData = [
+          { id: 1, title: "Harina de Maíz", category: "Harinas", prepTime: "Variable", servings: "25 Lb", description: "La base de tantas cosas ricas. Nada como el maicito tostado en casa para que las preparaciones tengan ese sabor de verdad.", ingredients: ["25 Libras de maíz blanco o amarillo", "Paciencia para escoger y tostar"], instructions: ["Limpieza: Siéntate con buena luz y separa con cuidado todas las impurezas, piedritas o granos dañados del maíz.", "Tostado: Calienta el tiesto o una paila grande. Tuesta el maíz moviéndolo constantemente hasta que empiece a cambiar de color y huela rico.", "Molienda: Llévalo a moler hasta obtener una harina finita y suave.", "Guardado: Consérvala en un lugar seco, lista para usar."], color: "bg-gradient-to-br from-yellow-50 to-yellow-100" },
+          { id: 2, title: "Máchica", category: "Harinas", prepTime: "Variable", servings: "30 Lb", description: "Para el chapo del desayuno. Esa mezcla de cebada y morocho que nos ha alimentado a todos desde chiquitos, nuestra querida machica.", ingredients: ["25 Libras de cebada", "5 Libras de morocho", "Cariño para no quemar el grano"], instructions: ["Limpieza: Separa con paciencia las impurezas, piedritas y granos feos tanto de la cebada como del morocho.", "Cebada: En el tiesto caliente, tuesta la cebada hasta que empiece a tomar un bonito color amarillento.", "Morocho: Aparte, tuesta el morocho hasta que empiece a reventar (como canguil chiquito).", "Molienda: Junta ambos granos tostados y muélelos juntos hasta obtener nuestra querida machica."], color: "bg-gradient-to-br from-orange-50 to-orange-100" },
+          { id: 3, title: "Tamales", category: "Salados", prepTime: "2h 30m", servings: "40 u.", description: "El sabor de la fiesta y la reunión familiar. Masa de maíz suavecita, rellena de pollo y envuelta con cariño en hoja de achira.", ingredients: ["--- PARA LA MASA ---", "4 tazas de harina de maíz calentado (cernida)", "4 tazas de agua", "1/2 lb de manteca de cerdo", "1/2 lb de mantequilla", "1 lb de azúcar", "1 ½ cucharada de sal", "½ rama de cebolla blanca, picadita fina", "1 huevo (para el final)", "--- PARA EL RELLENO Y ARMADO ---", "1 pechuga de pollo cocida y desmenuzada", "1 taza de arveja cocida", "1 zanahoria cocida y picada en cuadritos", "2 huevos cocidos y picados", "1 cebolla paiteña para el refrito", "2 cucharadas de ajo molido", "Comino y pimienta al gusto", "Pasas al gusto", "40 hojas de achira (atchera), lavadas y secas"], instructions: ["Masa: En una paila grande, pon a hervir el agua con la cebolla blanca picada, la manteca de cerdo, la mantequilla, la sal y el azúcar.", "Cocción de la masa: Cuando hierva, añade de golpe la harina de maíz previamente cernida. ¡A mover el brazo con fuerza! Revuelve constantemente con una cuchara de madera durante unos 10 minutos, hasta que la masa se cocine y se desprenda de los lados de la paila. Deja enfriar.", "Amasado final: Una vez fría la masa, añade 1 huevo crudo y amasa suavemente con las manos hasta que se integre bien.", "Relleno: Haz un refrito sabroso con la cebolla paiteña, ajo, comino y pimienta. Mézclalo con el pollo desmenuzado, las arvejas y la zanahoria picada. Ten listos aparte los huevos cocidos picados y las pasas.", "Armado: Toma una porción de masa del tamaño de tu mano. Haz un hueco en el centro y coloca una cucharada generosa del relleno de pollo, un poquito de huevo picado y unas pasitas.", "Envoltura: Cierra la masa cubriendo el relleno y dale forma rectangular. Coloca el tamal sobre una hoja de achira y envuélvelo bien, doblando los extremos para que no se escape nada.", "Cocción: Prepara la tamalera (vaporera) con agua hirviendo. Acomoda los tamales con cuidado en los distintos niveles, sin apretarlos mucho. Cocínalos al vapor por 30 minutos o hasta que la hoja de achira cambie de color. Sírvelos calientitos."], color: "bg-gradient-to-br from-red-50 to-red-100" },
+          { id: 4, title: "Chigüiles", category: "Salados", prepTime: "2 horas", servings: "40 u.", description: "Pequeños envueltos de harina de maíz y queso, delicados y sabrosos. El compañero perfecto para un café pasado en la tarde.", ingredients: ["--- PARA LA MASA ---", "4 tazas de harina de maíz calentado (cernida)", "4 tazas de agua", "1/2 lb de manteca de cerdo", "1/2 lb de mantequilla", "2 cucharadas de azúcar", "1 cucharada de sal", "1 ½ ramas de cebolla blanca (picada fina)", "1 huevo (para el final)", "--- PARA EL RELLENO ---", "1 queso fresco (desmenuzado)", "1 ½ ramas de cebolla blanca (picada para refrito)", "Achiote y una pizca de sal", "--- PARA ENVOLVER ---", "40 hojas de maíz (lavadas y secas)"], instructions: ["Masa: En una paila grande, pon el agua, la mitad de la cebolla blanca picada finamente, la manteca, la mantequilla, la sal y el azúcar. Deja que hierva.", "Cocción de la masa: Añade la harina previamente cernida. Al momento que empiece a burbujear, remueve con cuchara de madera por los lados durante 10 minutos hasta que se incorpore todo y se cocine. Deja enfriar.", "Amasado: Una vez fría, añade el huevo y amasa suavemente hasta integrar.", "Relleno: Haz un refrito con el resto de la cebolla blanca, achiote y una pizca de sal. Sancóchalo bien (sofríe hasta que esté suave). Deja que se enfríe y mézclalo con el queso desmenuzado.", "Armado: Toma una porción de masa del tamaño de la mano y colócala en la palma. Haz un hoyo en el centro y coloca una cucharada del relleno de queso.", "Envoltura: Cubre el relleno con la masa y forma unos bollitos alargados. Colócalos en la hoja de maíz y envuélvelos cuidadosamente.", "Cocción: En la tamalera con agua hirviendo, ubica de forma ordenada los chigüiles en los dos niveles, evitando que se aplasten. Cocina por 30 minutos o hasta que la hoja cambie de color."], color: "bg-gradient-to-br from-yellow-50 to-yellow-100" },
+          { id: 5, title: "Buñuelos", category: "Dulces", prepTime: "1h 30m", servings: "40 u.", description: "Esponjosos, doraditos y bañados en una miel de panela aromática. No pueden faltar en las festividades.", ingredients: ["--- PARA LA MASA ---", "4 tazas de harina de maíz calentado", "4 tazas de agua", "1 lb de mantequilla", "2 cucharadas de azúcar", "1 cucharada de sal", "1 rama de cebolla blanca (picada finamente)", "16 huevos", "--- PARA LA MIEL ---", "2 lbs de panela", "2 hojas de higo", "1 raja de canela", "2 litros de agua"], instructions: ["Masa: En una paila poner el agua, 1 rama de cebolla blanca finamente picada, mantequilla, sal y azúcar. Hacer hervir.", "Cocción de la masa: Añadir la harina previamente cernida. Al momento que la harina empieza a burbujear, remover con una cuchara de madera por los lados durante 10 min hasta que se incorpore toda la mezcla y se cocine.", "Integración de huevos: Dejar enfriar la masa e ir incorporando los 16 huevos uno por uno, amasando suavemente hasta obtener una textura homogénea.", "Miel: Poner a hervir la panela, la canela y las hojas de higo en 2 litros de agua. Cocinar hasta que espese y tome consistencia de miel.", "Horneado: Precalentar el horno a 220°C. En una lata untar mantequilla e ir ubicando separadamente cucharadas de la masa preparada (dejar espacio entre ellas porque crecen).", "Tiempo: Hornearlos aproximadamente de 30 a 40 minutos hasta que estén dorados. Servir bañados con la miel caliente."], color: "bg-gradient-to-br from-purple-50 to-purple-100" },
+          { id: 6, title: "Tortillas de Maíz", category: "Salados", prepTime: "1h 30m", servings: "40 u.", description: "Doraditas al horno y con el corazón de queso. Una delicia tradicional perfecta para compartir.", ingredients: ["--- PARA LA MASA ---", "4 tazas de harina de maíz calentado", "3 tazas de agua tibia", "1 lb de manteca de cerdo", "2 cucharadas de azúcar", "1 cucharada de sal", "3 huevos", "--- PARA EL RELLENO ---", "1 queso (desmenuzado)", "1 cebolla blanca (para el refrito)", "Achiote", "Pizca de sal (si es necesario)"], instructions: ["Masa: En un recipiente añadir la harina previamente cernida, conjuntamente con la sal, azúcar y huevos. Mezclar hasta que se forme una consistencia uniforme.", "Textura: Ir colocando la manteca según la necesidad de la mezcla e ir añadiendo el agua tibia poco a poco hasta formar una masa manejable y suave.", "Relleno: Hacer un refrito con la cebolla blanca picada y achiote. Sancochar bien el refrito (freír hasta suavizar), dejar que se enfríe y mezclar con el queso previamente desmenuzado. Poner una pizca de sal si el queso es muy simple.", "Armado: Tomar una porción de masa a la medida de la mano, colocarla en la palma, hacer un hoyo en el centro y colocar una cucharada de relleno.", "Formado: Cubrir el relleno con la masa y aplastar suavemente para formar las tortillas.", "Horneado: En una lata untar manteca e ir ubicando las tortillas. Introducir al horno precalentado a 220 °C y hornearlas aproximadamente de 35 a 40 minutos hasta que estén doraditas."], color: "bg-gradient-to-br from-orange-50 to-orange-100" },
+          { id: 7, title: "Caldo de Bolas de Maíz", category: "Sopas", prepTime: "2 horas", servings: "8 p.", description: "Un caldo levantamuertos con bolas de maíz rellenas de carne, suave y reconfortante.", ingredients: ["--- PARA EL CALDO ---", "1 lb de carne de cerdo", "3 Litros de agua", "5 hojas de col (en trozos)", "1 cebolla blanca (para el refrito)", "1/2 pimiento", "3 pepas de ajo", "1 cucharada de sal y condimentos", "Leche y cilantro al gusto (para el final)", "--- PARA LAS BOLAS ---", "1 lb de harina de maíz calentado", "3 cucharadas de manteca de cerdo", "1 huevo", "1 taza de caldo (aproximadamente, para amasar)", "--- PARA EL RELLENO ---", "1/2 cebolla paiteña", "Carne de cerdo (cocinada del caldo)", "Achiote"], instructions: ["Caldo Base: Hacer un refrito con cebolla blanca, pimiento, ajo y condimentos. Colocar en una olla con el agua y los trozos de carne de cerdo. Dejar hervir hasta que la carne esté suavecita.", "Preparación de ingredientes: Cuando la carne esté lista, retírala para desmenuzarla. Añade los trozos de col al caldo hirviendo.", "Masa: En un recipiente coloca la harina, haz un hoyo en el centro y ubica el huevo y la manteca. Mezcla e incorpora poco a poco una taza del caldo caliente hasta que la masa no se pegue en las manos.", "Relleno: Haz un refrito con la cebolla paiteña y achiote, sancóchalo bien. Mezcla esto con la carne de cerdo que cocinaste y desmenuzaste.", "Armado: Toma una porción de masa, haz un hueco en el centro, pon una cucharada del relleno de carne y forma las bolas cerrando bien.", "Cocción Final: Cuando la col esté a medio cocinar, introduce las bolas de maíz con cuidado en el caldo. Deja cocinar hasta que las bolas floten. Al final, pon un chorrito de leche y cilantro picado. ¡Sirve calientito!"], color: "bg-gradient-to-br from-emerald-50 to-emerald-100" },
+          { id: 8, title: "Colada de Harina de Maíz", category: "Sopas", prepTime: "1 hora", servings: "8 p.", description: "Una colada espesita y sabrosa, ideal para calentar el cuerpo. Se puede preparar con carne, pollo o quesito.", ingredients: ["4 cucharadas de harina de maíz calentado", "3 Litros de agua", "1 lb de carne de cerdo, pollo o queso (al gusto)", "Papas picadas en trozos", "1 cucharada de sal", "1 cebolla blanca", "1/2 pimiento", "1 cucharada de ajo", "Cilantro al gusto", "Condimentos varios (comino, pimienta)"], instructions: ["Caldo base: Haz un refrito sabroso con la cebolla blanca picada, el pimiento, el ajo y tus condimentos favoritos. Coloca este refrito en una olla con los 3 litros de agua.", "Cocción de la carne: Añade los trozos de carne de cerdo (o pollo) al agua y deja hervir hasta que la carne esté cocinada y suave.", "Preparación de la harina: Saca una taza de este caldo caliente y déjala enfriar un poco. Añade la harina de maíz a esta taza y mezcla bien hasta que se disuelva por completo y no queden grumos. (Añade más o menos harina según qué tan espesita quieras la colada).", "Cocción final: Vierte la harina disuelta en la olla hirviendo. Agrega también las papas picadas en trozos. Deja cocinar todo junto hasta que las papas estén suaves y el caldo haya espesado.", "Servir: Apaga el fuego y añade cilantro picado al gusto. ¡Sirve bien caliente!"], color: "bg-gradient-to-br from-teal-50 to-teal-100" },
+          { id: 9, title: "Fanesca", category: "Sopas", prepTime: "4 horas", servings: "10 p.", description: "La reina de la Semana Santa. Una sopa sagrada que une a la familia, llena de granos tiernos y el sabor único del bacalao.", ingredients: ["--- GRANOS Y VERDURAS ---", "1 ½ tazas de habas tiernas peladas", "1 ½ tazas de fréjol tierno pelado", "1 taza de lenteja", "1 taza de arveja tierna", "3 tazas de choclo tierno desgranado", "2 tazas de chochos pelados", "1 taza de melloco picado", "1 taza de zanahoria pelada y picada", "1 ½ taza de zapallo tierno pelado y picado", "1 ½ taza de zambo tierno pelado y picado", "2 libras de papas cortadas en cubitos", "--- LÁCTEOS Y PESCADO ---", "1 libra de bacalao seco salado", "2 litros de leche", "1/2 libra de queso", "1 taza de fideo blanco pequeño", "1/2 taza de culantro y perejil picado", "--- PARA EL REFRITO ---", "1 cebolla blanca larga picada fina", "1 cebolla perla picada fina", "1 cebolla roja picada fina", "3 dientes de ajo picado", "1/2 taza de pimiento de colores picado", "2 cucharaditas de mantequilla y 1/2 de achiote", "Comino, pimienta y sal al gusto", "--- GUARNICIÓN ---", "3 huevos duros, 10 empanaditas, chifles", "10 tajadas de maduro frito, queso, ají"], instructions: ["Preparación previa: Poner en remojo el pescado un día antes, en agua suficiente que lo cubra.", "Cocción de granos: Cocinar los granos (fréjol, arveja, mellocos, lenteja) por separado sin sal hasta que estén suaves al tacto. Escurrirlos y dejar en espera.", "Base de la sopa: En una olla grande, cocinar el choclo, el zambo y el zapallo con un poco de agua hasta que estén suaves.", "Sabor: Añadir el refrito preparado con las cebollas, ajo, pimiento, mantequilla y achiote. Mecer constantemente.", "Integración: Incorporar los granos cocinados anteriormente y los chochos. Mecer constantemente y dejar hervir por 10 minutos más.", "Espesado y Leche: Añadir las papas picadas y el fideo. Dejar hervir por 10 minutos. Agregar las habas y la leche. Añadir el culantro y perejil picado finamente al gusto.", "Toque final: Por último, añadir el pescado (frito si es de su preferencia).", "Servir: Servir en un plato sopero. Decorar con huevo duro y queso. Las guarniciones (empanadas, maduro, chifles) se sirven en un plato aparte."], color: "bg-gradient-to-br from-indigo-50 to-indigo-100" },
+          { id: 10, title: "Pavo Relleno", category: "Salados", prepTime: "5-6 horas", servings: "30 p.", description: "El rey de la cena navideña. Un pavo jugoso, deshuesado y con un relleno agridulce espectacular que dejará a todos encantados.", ingredients: ["--- ALIÑO ---", "1 pavo de 10 kl (previamente deshuesado)", "1 litro de vino blanco", "Jugo de 3 naranjas agrias", "1 sobre de sazona pavo", "Pimienta, comino, salvia, orégano, tomillo, romero seco al gusto", "Sal al gusto", "--- RELLENO ---", "1 kilo de carne molida de cerdo", "1 kilo de carne molida de res", "1/2 kilo de tocino", "1 lata pequeña de paté (100g)", "250 gr de mantequilla", "1 frasco mediano de aceitunas picadas", "1/2 libra de pasas lavadas y escurridas", "1/2 libra de nueces picadas", "2 paquetes de galletas de dulce (opcional)", "2 panes de dulce o de sal (al gusto)", "1/2 litro de leche", "1 huevo", "Sal al gusto", "--- REFRITO DEL RELLENO ---", "3 cucharadas de ajo molido", "2 cebollas perla finamente picadas", "3 pimientos (rojo, verde, amarillo) finamente picados", "Comino, pimienta, orégano, sal al gusto", "--- SALSAS ---", "El jugo de la cocción del pavo", "1/2 libra de ciruelas pasas (o tamarindo, maracuyá, uvilla)"], instructions: ["Preparación del Pavo: Deshuesar el pavo y marinarlo con todos los ingredientes del aliño.", "Refrito base: En un sartén poner un chorrito de aceite y la mitad de la mantequilla. Incorporar la cebolla, el pimiento, el ajo y los condimentos. Mecer hasta que la cebolla se cristalice (se ponga transparente).", "Cocción de carnes: Añadir la carne de cerdo y de res al refrito, desmenuzando poco a poco sin dejar de mecer.", "Preparación del pan: Remojar las galletas y el pan en la leche.", "Mezcla del relleno: Luego de 15 minutos de cocción de las carnes, incorporar el resto de ingredientes (tocino, paté, aceitunas, pasas, nueces) incluyendo las galletas remojadas. Comprobar el sabor.", "Ligado: Retirar del fuego, esperar 10 minutos e incorporar el huevo. Mezclar todos los ingredientes hasta formar una mezcla uniforme.", "Relleno: Sacar el pavo del aliño y proceder a rellenarlo con la mezcla realizada.", "Costura: Coser el pavo con hilo de bridar (hilo chillo) para asegurar el relleno.", "Horneado inicial: Calentar el horno 15 minutos antes. Colocar el pavo en bandeja previamente enmantequillada, añadir 1/2 litro del aliño cernido y cubrir con papel aluminio. Cocinar hasta que la válvula se alce. Chequear constantemente que no se quede sin líquido.", "Dorado: Cuando se alce la válvula, escurrir el líquido sobrante en un recipiente aparte para la salsa. Retirar el papel aluminio y untar mantequilla en todo el pavo para que se dore.", "Salsa de frutas: Poner a hervir el líquido reservado. Licuar la mitad de la fruta escogida y añadirla al hervor por 5 minutos. Cernir y añadir el resto de la fruta picada. Comprobar sabor y espesor (si está muy espeso, agregar poco vino).", "Servir: Servir el pavo caliente bañado en su salsa."], color: "bg-gradient-to-br from-rose-50 to-rose-100", author: "Familia Rivera-Fierro" },
+          { id: 11, title: "Humitas", category: "Salados", prepTime: "2h 30m", servings: "50 u.", description: "Suaves, esponjosas y con ese sabor inconfundible a choclo tierno. El desayuno o café perfecto de la familia.", ingredients: ["1/2 saco de choclo de grano grueso (no muy maduro)", "1 lb de manteca de cerdo", "1/2 lb de mantequilla", "4 huevos", "2 cebollas blancas largas finamente picadas", "2 cucharadas de achiote", "1 queso fresco grande", "2 cucharaditas de polvo de hornear", "2 cucharadas de azúcar", "Sal al gusto"], instructions: ["Preparación de hojas: Cortar a un centímetro de la base del choclo para poder sacar las hojas con mucho cuidado. Reservarlas para la envoltura.", "Molienda: Desgranar el choclo y molerlo finamente. Para que queden más suaves, moler por segunda vez (remoler).", "Grasas: Derretir la manteca junto con la mantequilla y agregar esta mezcla al choclo molido.", "Sazón base: Añadir el azúcar y la sal a la masa. Mezclar bien.", "Aireado: Batir las claras a punto de nieve y luego añadir las yemas. Incorporar esta mezcla suavemente al choclo molido.", "Toque final masa: Añadir el polvo de hornear y mezclar hasta tener una masa uniforme. Comprobar la sal.", "Relleno: Hacer un refrito con la cebolla y el achiote. Dejar enfriar y mezclar con el queso desmenuzado.", "Armado: En una hoja de choclo colocar 2 o 3 cucharadas de la masa de choclo, añadir una porción del relleno de queso en el centro y envolver bien doblando la hoja.", "Cocción: Cocinar en una tamalera al vapor durante una hora. Colocar las humitas solo cuando el agua ya esté hirviendo."], color: "bg-gradient-to-br from-lime-100 to-lime-200" },
+          { id: 12, title: "Quimbolitos", category: "Dulces", prepTime: "45 min", servings: "50 u.", description: "Esponjosos y delicados, con ese toque de anís o vainilla que enamora. El compañero ideal para un café pasado.", ingredients: ["1 kilo de harina", "16 huevos (claras y yemas separadas)", "1 libra de mantequilla", "1 libra de azúcar", "3 cucharaditas de polvo de hornear", "1 cucharadita de esencia de vainilla", "2 cucharaditas de licor (anís o aguardiente)", "1 queso", "1 libra de pasas", "50 hojas de achira (limpias)"], instructions: ["Cremado: Batir la mantequilla junto con el azúcar hasta que se disuelva el azúcar y se forme una crema blanca suave.", "Incorporación de yemas: Añadir una a una las yemas a la mezcla anterior y continuar batiendo.", "Punto de nieve: Aparte, batir las claras a punto de nieve hasta que estén firmes.", "Mezcla envolvente: Incorporar a la masa principal las claras batidas alternando con la harina, poco a poco y en cantidades iguales, con movimientos suaves.", "Aromatizar: Añadir el polvo de hornear, la esencia de vainilla y el licor. Continuar batiendo hasta tener una mezcla homogénea.", "Queso: Añadir el queso desmenuzado a la masa.", "Armado: En una hoja de achira limpia (por el lado del revés/opaco) colocamos 2 cucharadas de masa. Ponemos 4 pasas encima como decoración y envolvemos doblando los lados.", "Cocción: Cocinar en una tamalera (vaporera) durante 20 minutos. Importante: colocar los quimbolitos cuando el agua ya esté hirviendo y NO poner uno sobre otro para que crezcan bonitos."], color: "bg-gradient-to-br from-sky-100 to-sky-200" },
+          { id: 13, title: "Jucho", category: "Dulces", prepTime: "45 min", servings: "12 p.", description: "Una bebida sagrada y dulce, típica del Carnaval. El capulí y el durazno se unen en este almíbar reconfortante.", ingredients: ["2 libras de capulí maduro lavado", "12 duraznos maduros pelados", "12 peras maduras peladas", "3 manzanas maduras peladas y cortadas en 4 partes", "3 cucharadas de almidón de yuca", "4 litros de agua", "Azúcar al gusto"], instructions: ["Cocción de frutas: Poner a hervir 4 litros de agua. Añadir el durazno, la pera y la manzana. Cuando el durazno esté suave, añadimos el capulí y el azúcar al gusto.", "Espesado: En media taza de agua fría, disolvemos el almidón de yuca y lo añadimos a la olla de las frutas moviendo para que no se hagan grumos.", "Cocción final: Dejamos hervir por 30 minutos para que los sabores se concentren y el almíbar tome cuerpo. Comprobamos el dulce.", "Servir: Servir de preferencia caliente, aunque frío también es delicioso."], color: "bg-gradient-to-br from-purple-100 to-purple-200" },
+          { id: 14, title: "Arroz Relleno", category: "Salados", prepTime: "1 hora", servings: "6 p.", description: "Un arroz jugoso y lleno de sabor, preparado con el toque secreto del tomate y el cariño de Mami Margarita.", ingredients: ["1 libra de arroz", "1 libra de pechuga de pollo", "1 tomate riñón maduro mediano", "1/2 taza de arveja", "1/2 taza de zanahoria picada en cuadritos", "1/2 taza de pasas", "1/2 cebolla finamente picada", "1 diente de ajo finamente picado", "2 litros de agua", "Sal al gusto"], instructions: ["Base del caldo: Licuar el tomate con un poco de agua. Colocar este licuado en una olla al fuego junto con el resto del agua.", "Sazón y cocción inicial: Añadir a la olla la cebolla picada, el ajo, la sal al gusto, la arveja, la zanahoria y la pechuga de pollo entera.", "Pollo: Dejar hervir hasta que el pollo esté bien cocinado. Retirar el pollo de la olla y desmenuzarlo (mecharlo).", "Arroz: En el mismo caldo donde se cocinó el pollo, añadir el arroz previamente lavado. Dejar cocinar hasta que empiece a secar.", "Mezcla final: Cuando el arroz esté secando, añadir el pollo mechado y las pasas lavadas. Mezclar con cuidado.", "Servir: Tapar y dejar que el arroz termine de cocerse por completo y granee. Servir calientito."], color: "bg-gradient-to-br from-orange-100 to-orange-200" },
+          { id: 15, title: "Zapallo de Dulce", category: "Dulces", prepTime: "45 min", servings: "5 p.", description: "Un postre tradicional, suave y cremoso. El zapallo maduro se deshace en leche endulzada con panela, creando un sabor a hogar.", ingredients: ["2 libras de zapallo bien maduro (picado y sin pepas)", "1 litro de leche", "2 litros de agua", "Panela al gusto para endulzar", "2 cucharadas de harina de maíz"], instructions: ["Cocción del zapallo: Poner a hervir el agua en una olla grande. Añadir el zapallo picado y cocinar hasta que esté suave.", "Leche y Dulce: Añadir la leche y la panela al gusto. Dejar que se integren los sabores.", "Espesado: En media taza de leche fría, disolver bien las 2 cucharadas de harina de maíz y añadir esta mezcla a la olla del zapallo.", "Punto final: Dejar hervir meciendo constantemente hasta que la preparación espese a su gusto. Servir calientito."], color: "bg-gradient-to-br from-amber-100 to-amber-200" },
+          { id: 16, title: "Chicha de Jora", category: "Bebidas", prepTime: "2 días", servings: "20 Litros", description: "La receta secreta del Abuelito Gonzalo. La bebida ancestral por excelencia, maíz germinado y fermentado con paciencia y sabiduría.", ingredients: ["5 libras de harina de jora (maíz nacido)", "20 litros de agua", "1 tapa de panela"], instructions: ["Remojo: Poner a remojar la jora en el agua fría.", "Base del pondo: Separar 2 litros de esa agua mecida y colocar en el fondo de un pondo (olla de barro).", "Cocción: Cocinar la jora remojada durante una hora y cernir. Dejar reposar hasta que esté tibio.", "Mezcla: En el pondo colocamos la tapa de panela sobre el agua fría que pusimos antes. Añadimos el agua tibia de la jora.", "Fermentación: Dejar en el pondo por 2 días hasta que fermente (se concentre el sabor).", "Nota: Si no fermenta la chicha en un día, se saca 2 litros de la mezcla del pondo, se hace hervir y se coloca nuevamente en el pondo para facilitar que fermente."], color: "bg-gradient-to-br from-amber-50 to-amber-100", author: "Papi Gonzalo" },
+          { id: 17, title: "Carlota de Piña", category: "Dulces", prepTime: "4 horas", servings: "30 p.", description: "Un postre cremoso, fresco y muy rendidor. La acidez de la piña se equilibra perfectamente con la crema, creando una nube de sabor tropical.", ingredients: ["1 piña madura grande (pelada, sin corazón y picada en cubitos)", "1 libra de gelatina de piña", "1 litro de crema de leche", "2 tazas de agua"], instructions: ["Cocción de la fruta: Colocamos en una olla la piña picada junto con las 2 tazas de agua. Dejar hervir hasta que la piña esté cocida y suave.", "Gelatina: Añadir la gelatina de piña poco a poco a la olla caliente, mezclando constantemente hasta que se disuelva completamente. Retirar del fuego y dejar que se enfríe totalmente (sin que cuaje aún).", "Crema: En un tazón aparte, batir la crema de leche hasta que espese (punto chantilly suave).", "Mezcla: Cuando la preparación de piña esté fría, mezclarla con la crema batida con movimientos envolventes para no bajar el aire.", "Refrigeración: Colocamos la mezcla en un molde grande o copas individuales y llevamos al refrigerador hasta que cuaje por completo.", "Variaciones: Esta receta queda deliciosa reemplazando la piña por frutillas, moras o la fruta de temporada que prefieras."], color: "bg-gradient-to-br from-yellow-50 to-yellow-100", author: "Familia Rivera-Fierro" },
+          { id: 18, title: "Morcillas", category: "Salados", prepTime: "4 horas", servings: "Variable", description: "Una tradición única. Tripitas rellenas de una mezcla agridulce de arroz, col, especias y panela. El acompañante perfecto para la fritada.", ingredients: ["1 tripaje completo", "12 tazas de arroz cocinado sin sal", "Una col grande picada finamente", "1 atado de cebolla blanca larga picado fino", "1 ½ libra de ajo", "100 gr de orégano seco y 100 gr de orégano fresco", "100 gr de perejil fresco picado finamente", "1 ½ libra de pasas", "3 libras de panela", "40 bizcochos bien molidos", "50 gr de canela y 50 gr de achiote en pepa", "1/2 cuchara de clavo de olor", "2 cucharas de pimienta de dulce (50 bolitas)", "1 cucharita de pimienta negra", "4 huevos", "1/2 taza de aceite"], instructions: ["Cocción de la col: Cocinar la col sin sal hasta que esté bien suave. Escurrir y exprimir hasta eliminar el agua por completo.", "Refrito: En una paila colocamos ½ taza de aceite y añadimos la cebolla blanca y la mitad del ajo licuado. Mecer constantemente hasta que la cebolla se cocine.", "Licuado de especias: En una licuadora colocamos la canela, clavo de olor, pimienta de dulce, pimienta negra, achiote con dos vasos de agua. Licuar bien y cernir (si quedan grumos, volver a licuar).", "Mezcla de sabores: Añadimos lo licuado y cernido al refrito de cebolla. Continuar meciendo por 15 minutos más hasta que se concentre el sabor. Retirar del fuego.", "Preparación de grasas: Retirar las grasitas que vienen en las tripas y picarlas muy finas.", "Chicharrones: Licuar el ajo sobrante. En una paila poner este ajo, comino, pimienta y sal. Añadir las grasitas picadas y dejar cocinar hasta que se reduzca el agua y suelten su propia grasa. Mecer hasta que se doren y reservar.", "Base del relleno: En un recipiente grande colocamos el arroz, la col cocinada, los bizcochos molidos y el refrito del paso 4. Mezclar bien hasta homogeneizar.", "Aromatización: En el centro de la mezcla anterior colocamos las hierbas (orégano fresco, seco y perejil).", "Sancochado de hierbas: Calentamos los chicharrones con su propia grasa hasta que hiervan. Verter estos chicharrones hirviendo sobre las hierbas para que se sancochen y suelten todo su aroma.", "Toque dulce: Cuando la mezcla haya enfriado un poco (que se soporte el calor), añadimos las pasas, la panela y 100 gr de sal.", "Mezcla final: Mezclar constantemente hasta que todo esté homogéneo. Comprobar el sabor.", "Embutido: Rellenar las tripas con la mezcla y amarrar los extremos con hilo chillo.", "Cocción final: Cocinar en un caldo con especias, cebolla y ajo hasta que las morcillas floten."], color: "bg-gradient-to-br from-stone-200 to-stone-300", author: "Tía Teresita" },
+          { id: 19, title: "Pozole", category: "Salados", prepTime: "1h 30m", servings: "8 p.", description: "Un plato reconfortante y lleno de tradición. Granos de maíz tiernos y carne suave en un caldo rojo vibrante, perfecto para celebrar.", ingredients: ["1 kg de mote precocido (maíz pozolero)", "1 kilo de carne de puerco", "1 pechuga de pollo grande (aprox. 700g)", "1 cabeza de ajo", "1 cebolla entera", "2 hojitas de laurel", "1 cucharadita de orégano", "1 cucharadita de comino", "100 gramos de chile ancho", "Sal al gusto", "--- PARA SERVIR ---", "Lechuga picada fina", "4 limones en mitades", "Tostadas de maíz", "Cebolla picada"], instructions: ["Base de carnes: Cocer el pollo y puerco en una olla grande con agua, junto con 1 cabeza de ajo, 1 cebolla entera y sal al gusto. Agregar las especias (laurel, orégano, comino). Cocinar a fuego medio durante 1 hora hasta que la carne esté bien suave.", "Salsa roja: Mientras tanto, hervir los chiles anchos en un poco de agua hasta que estén suaves. Quitar las semillas, licuarlos bien y cernir el caldo para obtener una salsa fina.", "Deshebrado: Cuando la carne esté suave, sacarla de la olla y deshebrarla (desmenuzarla).", "Unión de sabores: Agregar el mote (maíz) y la salsa de los chiles a la olla del caldo cuando todo esté cocido.", "Toque final: Regresar la carne deshebrada a la olla, rectificar la sazón con sal y dejar que hierva unos minutos más para que se integren los sabores antes de servir.", "Servir: Acompañar cada plato con lechuga picada, cebolla picada, unas gotas de limón y tostadas crujientes."], color: "bg-gradient-to-br from-red-100 to-orange-100", author: "Danny y Ana" },
+          { id: 20, title: "Pastel Tres Leches", category: "Dulces", prepTime: "1h 30m", servings: "12 p.", description: "El postre favorito de todos. Un bizcocho esponjoso bañado en una mezcla cremosa de tres leches, coronado con nueces y cerezas.", ingredients: ["--- PARA EL BIZCOCHO ---", "250 grs Mantequilla fundida", "1 taza de Azúcar", "8 Huevos (separar claras y yemas)", "2 tazas de requesón o queso crema (400grs)", "2 tazas de harina", "3 cucharaditas de polvo para hornear", "1/3 de taza de leche", "1 cucharadita de extracto de vainilla", "--- PARA LAS TRES LECHES ---", "1 taza Leche entera", "1 lata Leche evaporada", "1 lata Leche condensada", "3 cucharadas de brandy (opcional)", "1/2 taza de nuez picada", "1 taza de crema para batir", "10 cerezas para decorar"], instructions: ["Preparación: Precalienta el horno a 175° C. Engrasa y enharina un molde para hornear de 23 centímetros de diámetro.", "Cremado: En un recipiente grande, bate con la batidora la mantequilla fundida y el azúcar.", "Yemas y Queso: Agrega las yemas una a una batiendo (a mano con cuchara de palo si es posible). Luego mezcla el requesón e incorpóralo bien con la batidora.", "Secos y Líquidos: Cierne la harina con el polvo de hornear. Agrégala a la mezcla alternando con el 1/3 de taza de leche, la vainilla y una pizca de sal.", "Paloteado: Incorpora bien esta mezcla y 'palotea' (bate) mucho hasta que salgan 'ojitos' (burbujas de aire) en la masa.", "Claras: En otro tazón, bate las claras a punto de turrón. Agrégalas a la mezcla principal con movimientos envolventes.", "Horneado: Vierte la masa en el molde y hornea a 175°C por 45-50 minutos, hasta que pase la prueba del palillo.", "Enfriado: Deja enfriar 10 minutos, desmolda y coloca sobre una rejilla. Pica toda la superficie con un tenedor.", "Las Tres Leches: Tritura la nuez (sin que se haga aceite). Licua las 3 leches, la nuez y el brandy.", "Bañado: Separa 1 taza de la mezcla (reserva en refri) y vierte el resto poco a poco sobre el pastel hasta que lo absorba todo.", "Decoración: Bate la crema chantilly, cubre el pastel y adorna con las cerezas."], color: "bg-gradient-to-br from-stone-50 to-orange-50", author: "Lolita" },
+          { id: 21, title: "Mousse de Maracuyá", category: "Dulces", prepTime: "45 min", servings: "10 p.", description: "Un postre vibrante y tropical. La acidez del maracuyá se funde en una nube cremosa y dulce. Refrescante y adictivo.", ingredients: ["500 cc de crema de leche", "4 claras de huevo", "3/4 taza de azúcar", "1 taza de pulpa de maracuyá", "3 sobres de gelatina sin sabor", "1/2 taza de agua fría (para hidratar)"], instructions: ["Cremado: Batimos la crema de leche hasta que se haga como crema Chantilly (punto medio). No se bate mucho porque luego se corta. Reservar en refrigeración o congelador.", "Punto de nieve: Batimos las cuatro claras de huevo hasta que estén a punto de nieve firme. Añadimos el azúcar poquito a poco sin dejar de batir.", "Hidratación: Hidratar los tres sobres de gelatina sin sabor en 1/2 taza de agua fría y dejar reposar durante 2 minutos. Calentar la gelatina hidratada en microondas o a baño María solo hasta disolverla (evitar que hierva). Dejar entibiar.", "Mezcla final: Incorporamos la taza de pulpa de maracuyá a las claras batidas. Añadir la crema de leche batida con movimientos envolventes. Por último, agregar la gelatina ya disuelta en forma de hilo.", "Refrigeración: Colocar en moldes individuales o uno grande y poner a refrigerar hasta que cuaje."], color: "bg-gradient-to-br from-yellow-50 to-orange-50", author: "Magyta" }
+        ];
+
+        // --- Componente Principal ---
+        const RecetarioApp = () => {
+          const [view, setView] = useState('splash');
+          const [selectedRecipe, setSelectedRecipe] = useState(null);
+          const [filter, setFilter] = useState('Todos');
+          const [searchTerm, setSearchTerm] = useState('');
+          const [isListView, setIsListView] = useState(false);
+          const [mounted, setMounted] = useState(false);
+
+          useEffect(() => {
+            setMounted(true);
+            const timer = setTimeout(() => setView('home'), 4000); 
+            return () => clearTimeout(timer);
+          }, []);
+
+          // Scroll automático al inicio al cambiar de vista
+          useEffect(() => {
+            window.scrollTo(0, 0);
+          }, [view]);
+          
+          // NUEVO: Manejo del historial para el botón "Atrás" del celular
+          useEffect(() => {
+            const handlePopState = (event) => {
+              if (view === 'detail') {
+                setView('home');
+                setSelectedRecipe(null);
+              }
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => window.removeEventListener('popstate', handlePopState);
+          }, [view]);
+
+          const handleRecipeClick = (recipe) => {
+            setSelectedRecipe(recipe);
+            setView('detail');
+            // Empujar estado al historial
+            window.history.pushState({ page: 'detail' }, '', '#receta');
+          };
+
+          const handleBackClick = () => {
+             // Forzar el cambio de vista directamente
+             if (view !== 'home') {
+                 setView('home');
+                 setSelectedRecipe(null);
+             }
+          };
+          
+          const handleCopyLink = () => {
+            const link = "https://poisonedisa.github.io/Recetario-de-Mamita-Margarita/";
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            textArea.style.position = "fixed"; 
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? '¡Enlace copiado!' : 'No se pudo copiar';
+                alert(msg);
+            } catch (err) {
+                console.error('Error al copiar', err);
+                alert("Error al copiar el enlace manualmente");
+            }
+            
+            document.body.removeChild(textArea);
+          };
+
+          const categories = ['Todos', 'Harinas', 'Sopas', 'Salados', 'Dulces', 'Bebidas'];
+
+          const filteredRecipes = useMemo(() => {
+            return recipesData.filter(recipe => {
+              const matchesCategory = filter === 'Todos' || recipe.category === filter;
+              const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
+              return matchesCategory && matchesSearch;
+            });
+          }, [filter, searchTerm]);
+
+          // Animaciones
+          const fadeAnimation = "transition-opacity duration-1000 ease-in-out";
+          const slideUpAnimation = "transition-transform duration-700 ease-out transform";
+
+          // --- SPLASH SCREEN: Marco Floral ---
+          if (view === 'splash') {
+            return (
+              <div className={`fixed inset-0 z-50 bg-paper flex flex-col items-center justify-center p-6 overflow-hidden ${fontBody}`}>
+                {/* Marco Floral Decorativo */}
+                <div className={`absolute inset-0 p-6 transition-all duration-[2000ms] ${mounted ? 'scale-100 opacity-100' : 'scale-95 opacity-0'}`}>
+                    <div className="absolute top-0 left-0 w-32 h-32 md:w-48 md:h-48 transform -translate-x-8 -translate-y-8">
+                       <GeraniumIcon className="w-full h-full opacity-60 rotate-180 text-rose-300" />
+                    </div>
+                    <div className="absolute top-0 right-0 w-32 h-32 md:w-48 md:h-48 transform translate-x-8 -translate-y-8">
+                       <GeraniumIcon className="w-full h-full opacity-60 -rotate-90 text-rose-300" />
+                    </div>
+                    <div className="absolute bottom-0 left-0 w-32 h-32 md:w-48 md:h-48 transform -translate-x-8 translate-y-8">
+                       <GeraniumIcon className="w-full h-full opacity-60 rotate-90 text-rose-300" />
+                    </div>
+                    <div className="absolute bottom-0 right-0 w-32 h-32 md:w-48 md:h-48 transform translate-x-8 translate-y-8">
+                       <GeraniumIcon className="w-full h-full opacity-60 text-rose-300" />
+                    </div>
+                    
+                    {/* Borde interno */}
+                    <div className="absolute inset-10 border-2 border-rose-200 rounded-[3rem]"></div>
+                </div>
+                
+                <div className={`z-10 flex flex-col items-center ${mounted ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10'} ${fadeAnimation} ${slideUpAnimation} delay-300`}>
+                  <div className="relative mb-8 p-8 bg-white/90 backdrop-blur-md rounded-full shadow-2xl border border-rose-100">
+                     <GeraniumIcon className="w-32 h-32 drop-shadow-lg relative z-10" />
+                  </div>
+                  
+                  <h1 className={`text-6xl md:text-7xl text-rose-900 text-center mb-6 ${fontTitle} drop-shadow-sm leading-snug tracking-wide`}>
+                    Mamita<br/>Margarita
+                  </h1>
+                  
+                  <div className="flex flex-col items-center space-y-4 mb-8">
+                    <span className="h-px w-24 bg-rose-300"></span>
+                    <p className="text-rose-700 tracking-[0.3em] text-xs uppercase font-bold font-sans">Recetario Familiar</p>
+                    <span className="h-px w-12 bg-rose-300"></span>
+                  </div>
+
+                  {/* Espacio suficiente para evitar superposición */}
+                  <div className="mt-12">
+                      <p className="text-rose-500 text-[10px] font-bold tracking-widest uppercase animate-pulse font-sans">
+                        Familia Rivera-Fierro
+                      </p>
+                  </div>
+                </div>
+              </div>
+            );
+          }
+
+          // --- PANTALLA COMPARTIR (Full Page) ---
+          if (view === 'share') {
+             return (
+               <div className={`min-h-screen bg-rf-pattern ${fontBody} animate-fade-in relative overflow-hidden flex flex-col`}>
+                  
+                  {/* Header UNIFICADO */}
+                  <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex items-center">
+                    <button 
+                      onClick={handleBackClick}
+                      className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
+                    >
+                      <ArrowLeftIcon size={28} className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <span className={`ml-4 text-2xl text-rose-800 ${fontTitle}`}>Compartir</span>
+                  </div>
+                  
+                  <div className="flex-grow flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full z-10">
+                     <div className="bg-white/95 p-8 rounded-[2.5rem] shadow-xl border-2 border-rose-100 w-full relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-300 via-pink-300 to-rose-300"></div>
+
+                        <div className="mb-6 flex justify-center">
+                            <div className="bg-rose-50 p-6 rounded-full shadow-inner ring-4 ring-white">
+                               <ShareIcon size={40} className="text-rose-500" />
+                            </div>
+                        </div>
+                        
+                        <h2 className={`text-4xl text-rose-900 mb-4 ${fontTitle}`}>Compartir con Amor</h2>
+                        <p className="text-stone-500 mb-8 leading-relaxed">
+                           Comparte el sabor de nuestro hogar con quienes más quieres. Escanea para llevar las recetas contigo.
+                        </p>
+                        
+                        {/* Área para el Código QR (IMAGEN REAL) */}
+                        <div className="bg-white border-4 border-rose-50 rounded-3xl p-2 mb-8 flex flex-col items-center justify-center overflow-hidden shadow-sm mx-auto max-w-[200px]">
+                            <div className="w-full aspect-square bg-white rounded-2xl overflow-hidden">
+                               <img 
+                                 src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/156500899e88fdad35432fbc703bebe17b143116/qr_mamita_margarita.png?raw=true" 
+                                 alt="Código QR del Recetario"
+                                 className="w-full h-full object-contain"
+                               />
+                            </div>
+                        </div>
+                        
+                        <button onClick={handleCopyLink} className="w-full bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span>Copiar Enlace</span>
+                        </button>
+                     </div>
+                     <p className="mt-8 text-rose-400 text-xs font-bold uppercase tracking-widest bg-white/50 px-4 py-1 rounded-full backdrop-blur-sm">Recetario Mamita Margarita</p>
+                  </div>
+               </div>
+             );
+          }
+
+          // --- PANTALLA CRÉDITOS (Full Page) ---
+          if (view === 'credits') {
+             return (
+               <div className={`min-h-screen bg-paper ${fontBody} animate-fade-in relative flex flex-col`}>
+                  {/* Header UNIFICADO */}
+                  <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex items-center">
+                    <button 
+                      onClick={handleBackClick}
+                      className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
+                    >
+                      <ArrowLeftIcon size={28} className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <span className={`ml-4 text-2xl text-rose-800 ${fontTitle}`}>Nuestra Historia</span>
+                  </div>
+
+                  <div className="flex-grow p-6 max-w-lg mx-auto w-full pb-20">
+                      <div className="bg-white rounded-[2.5rem] p-10 shadow-lg border border-rose-100 text-center relative overflow-hidden mb-8">
+                         <GeraniumIcon className="w-32 h-32 mx-auto mb-6 opacity-80" />
+                         <h2 className={`text-5xl text-rose-900 mb-2 ${fontTitle} leading-tight`}>Un Legado<br/>de Sabor</h2>
+                         <div className="w-16 h-1 bg-rose-200 mx-auto my-6 rounded-full"></div>
+                         
+                         {/* Sección Dedicatoria */}
+                         <div className="relative mb-10">
+                             <div className="w-full aspect-[4/3] bg-stone-100 rounded-2xl mx-auto mb-6 border-4 border-white shadow-md flex items-center justify-center overflow-hidden ring-4 ring-rose-50 relative">
+                                {/* Placeholder Imagen - Cambiar src por la URL real */}
+                                <img 
+                                    src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/08afe4241c1a85d06b7ad38ca9523c683b45b693/mamita%20margarita%20y%20papito%20gonzalo.png?raw=true" 
+                                    alt="Abuelitos" 
+                                    className="w-full h-full object-cover object-top opacity-95 hover:scale-105 transition-transform duration-700"
+                                />
+                             </div>
+                             <p className={`text-xl text-stone-600 italic leading-relaxed ${fontBody} px-4`}>
+                                "Dedicado con amor para Mamita Margarita y Papi Gonzalo."
+                             </p>
+                             <div className="mt-6 flex justify-center">
+                                <HeartHandIcon size={32} className="text-rose-400" />
+                             </div>
+                         </div>
+                         
+                         {/* Créditos Detallados */}
+                         <div className="space-y-8 border-t border-rose-100 pt-8">
+                            <div className="space-y-1">
+                               <p className="text-xs text-rose-400 font-bold uppercase tracking-widest">Recetas de la</p>
+                               <p className={`text-3xl text-rose-800 ${fontTitle}`}>Familia Rivera-Fierro</p>
+                            </div>
+                            
+                            <div className="space-y-1">
+                               <p className="text-xs text-rose-400 font-bold uppercase tracking-widest">Creado con cariño por</p>
+                               <p className={`text-3xl text-rose-800 ${fontTitle}`}>Isaías Martínez</p>
+                            </div>
+                         </div>
+                      </div>
+                      
+                      <div className="text-center">
+                         <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">© 2025 • Hecho a mano con ❤️</p>
+                      </div>
+                  </div>
+               </div>
+             );
+          }
+
+          // --- RECIPE DETAIL ---
+          if (view === 'detail' && selectedRecipe) {
+            
+            const getBackgroundIcon = () => {
+                if (selectedRecipe.author === "Papi Gonzalo") {
+                    return (
+                        <>
+                            <GrandpaHatIcon className="absolute -bottom-10 -right-10 w-64 h-64 opacity-10 rotate-12" />
+                            <GrandpaHatIcon className="absolute top-8 left-8 w-16 h-16 opacity-20" />
+                        </>
+                    );
+                } else if (selectedRecipe.author === "Tía Lolita" || selectedRecipe.author === "Tía Teresita") {
+                    return (
+                        <>
+                            <ThreadIcon className="absolute -bottom-10 -right-10 w-64 h-64 opacity-10 rotate-12" />
+                            <ThreadIcon className="absolute top-8 left-8 w-16 h-16 opacity-20" />
+                        </>
+                    );
+                } else if (["Familia Rivera-Fierro", "Danny y Ana", "Lolita"].includes(selectedRecipe.author)) {
+                    return (
+                        <>
+                            <FamilyIcon className="absolute -bottom-10 -right-10 w-64 h-64 opacity-10 rotate-12" />
+                            <FamilyIcon className="absolute top-8 left-8 w-16 h-16 opacity-20" />
+                        </>
+                    );
+                } else if (selectedRecipe.author === "Magyta") {
+                    return (
+                        <>
+                            <DaisyIcon className="absolute -bottom-16 -right-16 w-64 h-64 opacity-10 rotate-12" />
+                            <DaisyIcon className="absolute top-8 left-8 w-16 h-16 opacity-20" />
+                        </>
+                    );
+                }
+                return (
+                    <>
+                        <GeraniumIcon className="absolute -bottom-16 -right-16 w-64 h-64 opacity-10 rotate-12" />
+                        <GeraniumIcon className="absolute top-8 left-8 w-16 h-16 opacity-20" />
+                    </>
+                );
+            };
+
+            return (
+              <div className={`min-h-screen bg-paper ${fontBody} animate-fade-in`}>
+                {/* Header */}
+                <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex justify-between items-center">
+                  <button 
+                    onClick={handleBackClick}
+                    className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
+                  >
+                    <ArrowLeftIcon size={28} className="group-hover:-translate-x-1 transition-transform" />
+                  </button>
+                  <div className="w-8"></div>
+                </div>
+
+                <div className="max-w-3xl mx-auto px-6 pb-24 pt-4">
+                  {/* Hero Banner */}
+                  <div className={`w-full aspect-[4/3] md:aspect-[21/9] ${selectedRecipe.color} rounded-[2.5rem] flex items-center justify-center relative overflow-hidden shadow-inner mb-8 group border border-white/50`}>
+                     {/* Marca de agua fondo dinámica */}
+                     {getBackgroundIcon()}
+
+                     {/* Icono Principal (Categoría siempre) */}
+                     <div className="transform transition-transform duration-500 group-hover:scale-110 drop-shadow-xl">
+                        <RecipeSpecificIcon 
+                            recipe={selectedRecipe} 
+                            className="text-rose-900/60 w-32 h-32" 
+                        />
+                     </div>
+                  </div>
+
+                  {/* Title & Meta */}
+                  <div className="text-center mb-12">
+                    <span className="inline-block px-5 py-1.5 rounded-full bg-rose-100 text-rose-700 text-xs font-bold tracking-widest uppercase mb-6 shadow-sm border border-rose-200">
+                      {selectedRecipe.category}
+                    </span>
+                    <h2 className={`text-5xl md:text-6xl text-rose-900 mb-6 leading-tight capitalize ${fontTitle}`}>
+                      {selectedRecipe.title.toLowerCase()}
+                    </h2>
+                    <p className="text-stone-600 text-lg md:text-xl leading-relaxed font-light italic max-w-2xl mx-auto px-4">
+                      "{selectedRecipe.description}"
+                    </p>
+                  </div>
+
+                  {/* Stats */}
+                  <div className="grid grid-cols-2 gap-6 mb-12 max-w-lg mx-auto px-4">
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex flex-col items-center justify-center text-rose-800 transition-transform hover:scale-105">
+                      <ClockIcon size={22} className="mb-2 text-rose-400"/>
+                      <span className="font-bold text-lg mb-1">{selectedRecipe.prepTime}</span>
+                      <span className="text-[10px] text-rose-300 uppercase font-bold tracking-wider">Tiempo</span>
+                    </div>
+                    <div className="bg-white p-5 rounded-2xl shadow-sm border border-rose-100 flex flex-col items-center justify-center text-rose-800 transition-transform hover:scale-105">
+                      <UsersIcon size={22} className="mb-2 text-rose-400"/>
+                      <span className="font-bold text-lg mb-1">{selectedRecipe.servings}</span>
+                      <span className="text-[10px] text-rose-300 uppercase font-bold tracking-wider">Porciones</span>
+                    </div>
+                  </div>
+
+                  {/* Ingredientes */}
+                  <div className="bg-white rounded-[2.5rem] p-8 md:p-12 shadow-[0_20px_50px_-12px_rgba(0,0,0,0.05)] mb-12 relative overflow-hidden border border-rose-50 mx-2">
+                    <div className="absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r from-rose-200 via-orange-100 to-rose-200"></div>
+                    <h3 className={`text-4xl text-rose-900 mb-10 ${fontTitle} tracking-wide border-b border-rose-100 pb-4`}>
+                      Ingredientes
+                    </h3>
+                    <ul className="space-y-6">
+                      {selectedRecipe.ingredients.map((ing, i) => (
+                        <li key={i} className="flex items-start group">
+                          <div className="mt-2 mr-5 flex-shrink-0">
+                            {/* Florcita como viñeta */}
+                             <svg width="12" height="12" viewBox="0 0 24 24" className="text-rose-400 fill-current">
+                                <path d="M12 2L15 8L22 9L17 14L18 21L12 18L6 21L7 14L2 9L9 8L12 2Z" />
+                             </svg>
+                          </div>
+                          <span className={`text-lg md:text-xl text-stone-700 leading-snug font-normal ${ing.startsWith('---') ? "font-bold text-rose-600 uppercase text-xs tracking-widest mt-6 mb-2 block border-b border-rose-100 pb-1 w-full font-sans" : ""}`}>
+                             {ing.replace(/---/g, '')}
+                          </span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+
+                  {/* Instrucciones */}
+                  <div className="mb-20 px-2">
+                    <h3 className={`text-4xl text-rose-900 mb-10 px-4 ${fontTitle} tracking-wide`}>Preparación</h3>
+                    <div className="space-y-8">
+                      {selectedRecipe.instructions.map((step, i) => (
+                        <div key={i} className="flex gap-6 p-6 rounded-[2rem] bg-white border border-transparent hover:border-rose-100 hover:shadow-md transition-all shadow-sm">
+                          <div className="flex-shrink-0">
+                            <div className={`w-12 h-12 rounded-full flex items-center justify-center text-rose-800 font-bold text-2xl shadow-sm ${fontTitle} bg-rose-50 border border-rose-100`}>
+                              {i + 1}
+                            </div>
+                          </div>
+                          <div className="pt-1 w-full text-lg md:text-xl text-stone-700 leading-relaxed font-normal">
+                            {renderInstruction(step)}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                     {/* Footer Signature */}
+                     <div className="text-center py-16 opacity-90 flex flex-col items-center border-t border-rose-200/60 mx-8">
+                        {selectedRecipe.author === "Papi Gonzalo" ? (
+                          <GrandpaHatIcon className="w-24 h-24 mb-6 text-amber-800/50 animate-pulse" />
+                        ) : (selectedRecipe.author === "Tía Lolita" || selectedRecipe.author === "Tía Teresita") ? (
+                          <ThreadIcon className="w-24 h-24 mb-6 text-pink-700/50 animate-pulse" />
+                        ) : ["Familia Rivera-Fierro", "Danny y Ana", "Lolita"].includes(selectedRecipe.author) ? (
+                          <FamilyIcon className="w-24 h-24 mb-6 text-rose-700/50 animate-pulse" />
+                        ) : selectedRecipe.author === "Magyta" ? (
+                          <DaisyIcon className="w-24 h-24 mb-6 text-yellow-500/50 animate-pulse" />
+                        ) : (
+                          <GeraniumIcon className="w-20 h-20 mb-6 opacity-70" />
+                        )}
+                        <p className={`text-5xl text-rose-900 ${fontScript} leading-relaxed p-4`}>
+                          {selectedRecipe.author 
+                            ? `Con amor, ${selectedRecipe.author}` 
+                            : "Con amor, Mamita Margarita"}
+                        </p>
+                     </div>
+                </div>
+              </div>
+            );
+          }
+
+          // --- HOME VIEW ---
+          return (
+            <div className={`min-h-screen bg-paper ${fontBody} relative overflow-x-hidden`}>
+              
+              {/* Header Home */}
+              <div className="bg-white rounded-b-[3.5rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.03)] pt-14 pb-10 px-8 relative z-10">
+                <div className="flex justify-between items-start mb-6">
+                  <div>
+                    <p className="text-rose-400 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 font-sans">Recetario Familiar</p>
+                    <h1 className={`text-5xl md:text-6xl text-rose-900 leading-[0.95] ${fontTitle} mb-3`}>
+                      Mamita<br/>Margarita
+                    </h1>
+                    <div className="flex items-center gap-3">
+                       <span className="w-8 h-px bg-rose-300"></span>
+                       <p className="text-rose-500 text-[10px] font-bold tracking-widest uppercase font-sans">Familia Rivera-Fierro</p>
+                    </div>
+                  </div>
+                  {/* Botones de acción en el header */}
+                  <div className="flex gap-3">
+                      <button onClick={() => setView('share')} className="p-3 bg-rose-50 rounded-full text-rose-500 hover:bg-rose-100 transition-colors shadow-sm active:scale-95">
+                         <ShareIcon size={22} />
+                      </button>
+                      <button onClick={() => setView('credits')} className="p-3 bg-rose-50 rounded-full text-rose-500 hover:bg-rose-100 transition-colors shadow-sm active:scale-95">
+                         <HeartHandIcon size={22} />
+                      </button>
+                  </div>
+                </div>
+
+                {/* Search Bar */}
+                <div className="relative group">
+                  <div className="absolute inset-0 bg-rose-200 rounded-2xl blur opacity-20 group-focus-within:opacity-40 transition-opacity duration-500"></div>
+                  <div className="relative bg-[#fff1f2] rounded-2xl flex items-center px-5 py-4 shadow-inner border border-transparent group-focus-within:bg-white group-focus-within:border-rose-100 group-focus-within:shadow-lg transition-all duration-300">
+                    <SearchIcon className="text-rose-400 mr-4 group-focus-within:text-rose-600" size={20} />
+                    <input 
+                      type="text" 
+                      placeholder="¿Qué se te antoja hoy?" 
+                      className="w-full bg-transparent outline-none text-rose-900 placeholder-rose-300/80 text-lg font-medium"
+                      value={searchTerm}
+                      onChange={(e) => setSearchTerm(e.target.value)}
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Categories */}
+              <div className="mt-10 pl-8 overflow-x-auto no-scrollbar pb-6">
+                <div className="flex gap-4">
+                  {categories.map((cat, i) => (
+                    <button
+                      key={cat}
+                      onClick={() => setFilter(cat)}
+                      className={`
+                        px-7 py-3 rounded-full whitespace-nowrap transition-all duration-300 text-sm font-bold shadow-sm flex items-center gap-2 border
+                        ${filter === cat 
+                          ? 'bg-rose-600 text-white border-rose-600 shadow-rose-200/50 shadow-lg scale-105' 
+                          : 'bg-white text-stone-500 border-stone-100 hover:bg-rose-50 hover:border-rose-200 hover:text-rose-600'}
+                      `}
+                      style={{ animationDelay: `${i * 100}ms` }}
+                    >
+                      {cat !== 'Todos' && <CategoryIcon category={cat} className={`w-4 h-4 ${filter === cat ? 'text-white' : 'text-rose-400'}`} />}
+                      {cat}
+                    </button>
+                  ))}
+                  <div className="w-6"></div> 
+                </div>
+              </div>
+
+              {/* Recipe Grid/List */}
+              <div className="px-6 mt-4 pb-32 max-w-5xl mx-auto">
+                <div className="flex justify-between items-end mb-8 px-2">
+                  <h2 className={`text-4xl text-rose-900 ${fontTitle}`}>
+                    {filter === 'Todos' ? 'Menú de la Abuela' : filter}
+                  </h2>
+                  <span className="text-xs font-bold text-rose-500 bg-white px-3 py-1.5 rounded-full shadow-sm mb-1.5 border border-rose-100">
+                    {filteredRecipes.length} recetas
+                  </span>
+                </div>
+
+                <div className={`grid gap-6 ${isListView ? 'grid-cols-1' : 'grid-cols-1 sm:grid-cols-2 lg:grid-cols-3'}`}>
+                  {filteredRecipes.length === 0 ? (
+                     <div className="col-span-full text-center py-20 opacity-50">
+                       <GeraniumIcon className="w-24 h-24 mx-auto mb-4 grayscale opacity-30" />
+                       <p className="text-xl text-rose-400 font-bold font-serif">No hay recetas aquí...</p>
+                     </div>
+                  ) : (
+                    filteredRecipes.map((recipe, index) => (
+                      <div 
+                        key={recipe.id}
+                        onClick={() => handleRecipeClick(recipe)}
+                        className={`
+                          ${cardBaseStyle} group cursor-pointer animate-fade-in
+                          ${isListView ? 'p-5 flex items-center gap-6' : 'p-6 flex flex-col'}
+                        `}
+                        style={{ animationDelay: `${index * 80}ms` }}
+                      >
+                        {/* Image/Icon Container */}
+                        <div className={`
+                          relative overflow-hidden flex-shrink-0 flex items-center justify-center transition-transform duration-700 ease-out group-hover:scale-105
+                          ${isListView ? 'w-20 h-20 rounded-2xl' : 'w-full aspect-[4/3] rounded-[2rem] mb-5 shadow-inner'}
+                          ${recipe.color}
+                        `}>
+                           {!isListView && <CategoryIcon category={recipe.category} className="absolute -bottom-6 -right-6 w-36 h-36 opacity-10 rotate-12 transition-transform duration-700 group-hover:rotate-45" />}
+                           
+                           <RecipeSpecificIcon 
+                              recipe={recipe} 
+                              className={`text-rose-900/40 drop-shadow-sm transition-all duration-500 group-hover:scale-110 ${isListView ? 'w-10 h-10' : 'w-20 h-20'}`} 
+                           />
+                        </div>
+
+                        {/* Content */}
+                        <div className="flex-grow min-w-0 flex flex-col">
+                          <div className="flex justify-between items-start mb-2">
+                            <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                              {recipe.category}
+                            </span>
+                            {recipe.author === "Papi Gonzalo" && (
+                                <div className="bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                                    <span className="text-xs">🎩</span>
+                                </div>
+                            )}
+                          </div>
+                          
+                          <h3 className={`text-rose-900 leading-[1.1] mb-3 capitalize ${isListView ? 'text-2xl' : 'text-3xl'} ${fontTitle} group-hover:text-rose-600 transition-colors`}>
+                            {recipe.title.toLowerCase()}
+                          </h3>
+
+                          {!isListView && (
+                            <div className="flex items-center gap-3 mt-auto pt-2">
+                              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-100/50">
+                                <ClockIcon size={14} className="text-rose-400" />
+                                <span className="text-xs font-bold text-stone-500 font-sans">{recipe.prepTime}</span>
+                              </div>
+                              <div className="flex items-center gap-1.5 bg-stone-50 px-3 py-1.5 rounded-xl border border-stone-100/50">
+                                <UsersIcon size={14} className="text-rose-400" />
+                                <span className="text-xs font-bold text-stone-500 font-sans">{recipe.servings}</span>
+                              </div>
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Arrow Action (List View) */}
+                        {isListView && (
+                          <div className="bg-rose-50 p-2.5 rounded-full text-rose-500 group-hover:bg-rose-500 group-hover:text-white transition-colors shadow-sm">
+                            <ChevronRightIcon size={20} />
+                          </div>
+                        )}
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+
+              {/* Floating Action Button */}
+              <button 
+                onClick={() => setIsListView(!isListView)}
+                className="fixed bottom-8 right-8 w-16 h-16 bg-rose-600 text-white rounded-full shadow-[0_15px_35px_-5px_rgba(225,29,72,0.4)] flex items-center justify-center hover:scale-110 active:scale-95 transition-all z-40 group hover:bg-rose-500"
+                aria-label="Cambiar vista"
+              >
+                {isListView ? <GridIcon size={26} strokeWidth={2} /> : <ListIcon size={26} strokeWidth={2} />}
+              </button>
+
+            </div>
+          );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<RecetarioApp />);
+    </script>
+</body>
+</html>
