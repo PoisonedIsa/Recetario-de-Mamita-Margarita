@@ -24,12 +24,19 @@
         /* Optimizaciones de CSS */
         body {
             -webkit-tap-highlight-color: transparent;
-            overscroll-behavior-y: none; /* Evita el rebote de scroll en móviles */
+            overscroll-behavior-y: none;
+            text-rendering: optimizeLegibility;
         }
         
         .bg-paper {
             background-color: #fff1f2;
             background-image: url("data:image/svg+xml,%3Csvg width='100' height='100' viewBox='0 0 100 100' xmlns='http://www.w3.org/2000/svg'%3E%3Cpath d='M11 18c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm48 25c3.866 0 7-3.134 7-7s-3.134-7-7-7-7 3.134-7 7 3.134 7 7 7zm-43-7c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm63 31c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM34 90c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zm56-76c1.657 0 3-1.343 3-3s-1.343-3-3-3-3 1.343-3 3 1.343 3 3 3zM12 86c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm28-65c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm23-11c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-6 60c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm29 22c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zM32 63c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm57-13c2.76 0 5-2.24 5-5s-2.24-5-5-5-5 2.24-5 5 2.24 5 5 5zm-9-21c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM60 91c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM35 41c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2zM12 60c1.105 0 2-.895 2-2s-.895-2-2-2-2 .895-2 2 .895 2 2 2z' fill='%23e11d48' fill-opacity='0.03' fill-rule='evenodd'/%3E%3C/svg%3E");
+        }
+
+        /* Nueva trama RF para el menú compartir con MAYOR CONTRASTE */
+        .bg-rf-pattern {
+            background-color: #fff1f2;
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Ctext x='30' y='30' font-family='serif' font-size='14' fill='%23be123c' fill-opacity='0.12' text-anchor='middle' dominant-baseline='middle' transform='rotate(-15 30 30)'%3ERF%3C/text%3E%3C/svg%3E");
         }
 
         .no-scrollbar::-webkit-scrollbar { display: none; }
@@ -39,13 +46,18 @@
         .animate-spin-slow { animation: spin 20s linear infinite; }
 
         @keyframes fadeIn { 
-            from { opacity: 0; transform: translateY(10px); filter: blur(2px); } 
-            to { opacity: 1; transform: translateY(0); filter: blur(0); } 
+            from { opacity: 0; transform: translateY(10px); } 
+            to { opacity: 1; transform: translateY(0); } 
         }
-        /* Acelerado a 0.4s para mayor fluidez */
         .animate-fade-in { 
-            animation: fadeIn 0.3s ease-out forwards; 
+            animation: fadeIn 0.25s ease-out forwards; 
             will-change: transform, opacity;
+        }
+        
+        .layer-optimize {
+            transform: translateZ(0);
+            backface-visibility: hidden;
+            perspective: 1000px;
         }
     </style>
 </head>
@@ -53,18 +65,17 @@
     <div id="root"></div>
 
     <script type="text/babel">
-        const { useState, useEffect, useMemo, memo } = React;
+        const { useState, useEffect, useMemo, memo, useRef, useCallback } = React;
 
         // --- SISTEMA DE DISEÑO OPTIMIZADO ---
-        // Reducimos backdrop-blur y usamos colores semi-transparentes para mejor rendimiento
-        const cardBaseStyle = "bg-white/95 rounded-3xl shadow-sm border border-stone-200 transition-transform duration-200 ease-out active:scale-[0.98] overflow-hidden relative";
+        // Sombra más simple para mejor rendimiento en scroll
+        const cardBaseStyle = "bg-white/95 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-200 transition-transform duration-200 ease-out active:scale-[0.98] overflow-hidden relative layer-optimize";
         
         const fontTitle = "font-['Playfair_Display']"; 
         const fontBody = "font-['Lora']";             
         const fontScript = "font-['Great_Vibes']";    
 
-        // --- ICONOS MEMOIZADOS (Evita re-renderizados innecesarios) ---
-
+        // --- ICONOS DE INTERFAZ (MEMOIZADOS) ---
         const ClockIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ));
         const UsersIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path><circle cx="9" cy="7" r="4"></circle><path d="M23 21v-2a4 4 0 0 0-3-3.87"></path><path d="M16 3.13a4 4 0 0 1 0 7.75"></path></svg> ));
         const ArrowLeftIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg> ));
@@ -72,6 +83,11 @@
         const GridIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg> ));
         const ListIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><line x1="8" y1="6" x2="21" y2="6"></line><line x1="8" y1="12" x2="21" y2="12"></line><line x1="8" y1="18" x2="21" y2="18"></line><line x1="3" y1="6" x2="3.01" y2="6"></line><line x1="3" y1="12" x2="3.01" y2="12"></line><line x1="3" y1="18" x2="3.01" y2="18"></line></svg> ));
         const ChevronRightIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="9 18 15 12 9 6"></polyline></svg> ));
+        const ShareIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> ));
+        const HeartHandIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.28 3.6-2.34 4.58-2.74a2 2 0 0 0 1.24-2.57 2 2 0 0 0-2.6-1.2c-1.55.5-3.8 1.4-5.22 2.51"></path><path d="M22 6a3 3 0 1 0-6 0c0 1.66 1.12 3.01 2.5 3.5"></path><path d="M2.5 10.5C2.5 8 4.5 6 7 6a4.5 4.5 0 0 1 4 3 4.5 4.5 0 0 1 4-3c2.5 0 4.5 2 4.5 4.5 0 3.5-3.5 5.5-8.5 11C6 16 2.5 14 2.5 10.5Z"></path></svg> ));
+        const ImageIcon = memo(({ size = 64, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> ));
+        const LinkIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg> ));
+        const CheckIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg> ));
 
         // --- ICONOS DECORATIVOS BASE MEMOIZADOS ---
         const GeraniumIcon = memo(({ className }) => (
@@ -88,7 +104,6 @@
           </svg>
         ));
 
-        // Nuevo Icono: Margarita (Flor) para Magyta
         const DaisyIcon = memo(({ className }) => (
           <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
             <defs><radialGradient id="gradDaisy" cx="50%" cy="50%" r="50%" fx="50%" fy="50%"><stop offset="0%" style={{ stopColor: '#fef3c7', stopOpacity: 1 }} /><stop offset="100%" style={{ stopColor: '#fcd34d', stopOpacity: 1 }} /></radialGradient></defs>
@@ -220,14 +235,44 @@
              <path d="M30 55 Q60 65 90 55" fill="none" stroke="#fbbf24" strokeWidth="3" strokeDasharray="5,5"/>
           </svg>
         ));
-        
-        // --- HELPER CATEGORY ICON ---
+
+        // --- ICONOS ESPECÍFICOS DE RECETA (MEMOIZADOS) ---
+        const CornSackIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 85 Q25 95 35 95 H65 Q75 95 75 85 V45 Q75 25 50 25 Q25 25 25 45 Z" fill="#fde047" stroke="#b45309" strokeWidth="2"/><path d="M25 45 Q50 55 75 45" stroke="#b45309" strokeWidth="2" fill="none"/><path d="M35 25 L30 10 Q50 0 70 10 L65 25" fill="#fbbf24" stroke="#b45309"/><text x="50" y="75" fontSize="10" textAnchor="middle" fill="#b45309" fontWeight="bold" fontFamily="serif">MAÍZ</text><circle cx="40" cy="60" r="1.5" fill="#b45309"/><circle cx="60" cy="55" r="1.5" fill="#b45309"/></svg> ));
+        const MachicaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50 L90 45 L10 45 Z" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/><path d="M15 45 Q50 20 85 45" fill="#fcd34d" stroke="#b45309" strokeWidth="2"/><circle cx="40" cy="40" r="1.5" fill="#b45309" opacity="0.6"/><circle cx="60" cy="35" r="1.5" fill="#b45309" opacity="0.6"/><circle cx="50" cy="30" r="1.5" fill="#b45309" opacity="0.6"/><path d="M20 50 Q50 60 80 50" stroke="#c2410c" strokeWidth="1" fill="none" opacity="0.3"/></svg> ));
+        const TamalIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 55 Q50 85 85 55 Q50 25 15 55 Z" fill="#bef264" stroke="#4d7c0f" strokeWidth="2"/><path d="M15 55 L85 55" stroke="#4d7c0f" strokeWidth="1" opacity="0.5"/><path d="M48 45 L52 65" stroke="#4d7c0f" strokeWidth="2"/><path d="M52 45 L48 65" stroke="#4d7c0f" strokeWidth="2"/><path d="M15 55 Q30 45 45 45" stroke="#4d7c0f" strokeWidth="1" fill="none" opacity="0.5"/></svg> ));
+        const ChiguilIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 50 Q50 15 75 50 Q50 85 25 50 Z" fill="#fef08a" stroke="#d97706" strokeWidth="2"/><path d="M25 50 Q50 50 75 50" stroke="#d97706" strokeWidth="1" fill="none"/><path d="M25 50 Q35 30 50 30" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/><path d="M75 50 Q65 70 50 70" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/></svg> ));
+        const BunuelosIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="35" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><circle cx="65" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><circle cx="50" cy="35" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/><path d="M50 15 Q50 35 35 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/><path d="M50 15 Q60 35 65 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/><circle cx="50" cy="15" r="3" fill="#713f12"/></svg> ));
+        const TortillasIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="65" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="55" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="45" rx="35" ry="12" fill="#fcd34d" stroke="#d97706" strokeWidth="2"/><path d="M30 45 Q40 50 50 45" stroke="#b45309" strokeWidth="2" opacity="0.6"/><path d="M60 42 Q65 48 70 42" stroke="#b45309" strokeWidth="2" opacity="0.6"/></svg> ));
+        const CaldoBolasIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="8" fill="#ffedd5" stroke="#c2410c" strokeWidth="2"/><circle cx="50" cy="45" r="14" fill="#fcd34d" stroke="#d97706" strokeWidth="1.5"/><circle cx="50" cy="45" r="4" fill="#fb923c" opacity="0.6"/><path d="M35 48 Q40 52 45 48" stroke="#d97706" fill="none" opacity="0.5"/></svg> ));
+        const ColadaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 30 L32 80 Q32 90 50 90 Q68 90 68 80 L70 30 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="30" rx="20" ry="5" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><path d="M40 20 Q45 10 50 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/><path d="M55 20 Q60 10 65 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/><path d="M35 80 Q50 85 65 80" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.3"/></svg> ));
+        const FanescaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fff7ed" stroke="#ea580c" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="10" fill="#ffedd5" stroke="#ea580c" strokeWidth="2"/><path d="M35 45 Q50 35 65 45 Q50 55 35 45" fill="#94a3b8" stroke="#475569"/><circle cx="30" cy="52" r="3" fill="#bef264" stroke="#4d7c0f"/><circle cx="70" cy="48" r="3" fill="#fca5a5" stroke="#b91c1c"/><circle cx="50" cy="55" r="3" fill="#fcd34d" stroke="#d97706"/></svg> ));
+        const TurkeyIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="60" rx="35" ry="25" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><ellipse cx="50" cy="55" rx="25" ry="15" fill="#fcd34d" opacity="0.5"/><path d="M82 60 Q92 60 92 70 Q92 80 80 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><path d="M18 60 Q8 60 8 70 Q8 80 20 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/><path d="M35 50 Q50 35 65 50" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/><path d="M40 70 Q50 75 60 70" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/></svg> ));
+        const HumitaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M25 35 L50 85 L75 35" fill="#bef264" stroke="#365314" strokeWidth="2"/><path d="M25 35 Q50 55 75 35" fill="#d9f99d" stroke="#365314" strokeWidth="2"/><path d="M40 60 L60 60" stroke="#365314" strokeWidth="2"/><path d="M50 60 L50 65" stroke="#365314" strokeWidth="2"/></svg> ));
+        const QuimbolitoIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><rect x="25" y="35" width="50" height="35" rx="4" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2"/><path d="M25 35 L50 55 L75 35" fill="#bae6fd" stroke="#0284c7" strokeWidth="1.5"/><path d="M50 55 L50 70" stroke="#0284c7" strokeWidth="1.5" strokeDasharray="3 2"/><circle cx="50" cy="45" r="2" fill="#0284c7" opacity="0.5"/></svg> ));
+        const JuchoIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fce7f3" stroke="#be185d" strokeWidth="2"/><ellipse cx="50" cy="45" rx="30" ry="6" fill="#fbcfe8" stroke="#be185d" strokeWidth="2"/><circle cx="42" cy="50" r="5" fill="#4c0519" stroke="none"/><circle cx="58" cy="48" r="5" fill="#4c0519" stroke="none"/><circle cx="50" cy="55" r="6" fill="#fde047" stroke="#b45309"/></svg> ));
+        const RiceIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><ellipse cx="50" cy="70" rx="40" ry="12" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2"/><path d="M30 65 Q50 30 70 65" fill="#fff" stroke="#d1d5db" strokeWidth="2"/><circle cx="50" cy="45" r="2" fill="#fbbf24"/><path d="M40 55 L50 45 L60 55" fill="none" stroke="#d1d5db" strokeWidth="1"/></svg> ));
+        const PumpkinIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><ellipse cx="50" cy="45" rx="30" ry="6" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/><rect x="42" y="40" width="8" height="8" fill="#fb923c" stroke="#c2410c"/><rect x="52" y="38" width="6" height="6" fill="#fb923c" stroke="#c2410c"/></svg> ));
+        const ChichaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M35 30 L25 60 Q20 85 50 85 Q80 85 75 60 L65 30 Z" fill="#b45309" stroke="#78350f" strokeWidth="2"/><ellipse cx="50" cy="30" rx="15" ry="4" fill="#78350f"/><ellipse cx="50" cy="30" rx="13" ry="3" fill="#fcd34d"/><path d="M30 60 Q50 70 70 60" stroke="#fcd34d" strokeWidth="2" fill="none" strokeDasharray="3 3"/></svg> ));
+        const CarlotaIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 80 L25 30 H75 L70 80 Q50 90 30 80 Z" fill="#fef9c3" stroke="#facc15" strokeWidth="2"/><ellipse cx="50" cy="30" rx="25" ry="5" fill="#fff" stroke="#facc15" strokeWidth="2"/><path d="M50 25 L50 10 L60 15 L50 25" fill="#4ade80" stroke="#166534"/><path d="M50 25 L50 10 L40 15 L50 25" fill="#4ade80" stroke="#166534"/></svg> ));
+        const SausageIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 50 Q50 25 80 50 Q80 75 50 75 Q20 75 20 50" fill="#44403c" stroke="#1c1917" strokeWidth="2"/><path d="M25 50 Q50 35 75 50" stroke="#78716c" strokeWidth="2" fill="none" opacity="0.4"/><path d="M18 50 L12 50" stroke="#1c1917" strokeWidth="2"/><path d="M82 50 L88 50" stroke="#1c1917" strokeWidth="2"/><circle cx="30" cy="55" r="1" fill="#fff" opacity="0.3"/><circle cx="70" cy="60" r="1" fill="#fff" opacity="0.3"/></svg> ));
+        const PozoleIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M15 55 Q15 90 50 90 Q85 90 85 55 L90 50 L10 50 Z" fill="#b91c1c" stroke="#7f1d1d" strokeWidth="2"/><ellipse cx="50" cy="50" rx="35" ry="10" fill="#fecaca" stroke="#7f1d1d" strokeWidth="2"/><ellipse cx="50" cy="50" rx="30" ry="8" fill="#991b1b" opacity="0.9"/><circle cx="40" cy="52" r="4" fill="#fef08a"/><circle cx="60" cy="48" r="4" fill="#fef08a"/><path d="M35 30 Q40 20 45 30" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/><path d="M50 25 Q55 15 60 25" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/></svg> ));
+        const CakeSliceIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 40 L50 20 L80 40" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/><path d="M20 40 L50 60 L80 40 L80 70 L50 90 L20 70 Z" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/><path d="M20 50 L50 70 L80 50" fill="none" stroke="#d97706" strokeWidth="1" strokeDasharray="2 2"/><circle cx="50" cy="25" r="4" fill="#ef4444" stroke="#b91c1c"/><path d="M50 25 L55 15" stroke="#15803d" strokeWidth="1"/></svg> ));
+        const PassionFruitMousseIcon = memo(({ className }) => ( <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M30 30 L35 70 Q35 80 50 80 Q65 80 65 70 L70 30" fill="#fef9c3" stroke="#fbbf24" strokeWidth="2" opacity="0.9"/><path d="M50 80 V95 M35 95 H65" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round"/><path d="M30 30 Q50 40 70 30" fill="#fff" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/><circle cx="45" cy="25" r="2" fill="#000"/><circle cx="55" cy="22" r="2" fill="#000"/><circle cx="50" cy="28" r="2" fill="#000"/><path d="M35 25 Q50 10 65 25" fill="#fcd34d" stroke="none" opacity="0.8"/></svg> ));
+
+        const ICON_MAP = {
+            1: CornSackIcon, 2: MachicaIcon, 3: TamalIcon, 4: ChiguilIcon, 5: BunuelosIcon, 6: TortillasIcon, 7: CaldoBolasIcon, 8: ColadaIcon, 9: FanescaIcon, 10: TurkeyIcon, 11: HumitaIcon, 12: QuimbolitoIcon, 13: JuchoIcon, 14: RiceIcon, 15: PumpkinIcon, 16: ChichaIcon, 17: CarlotaIcon, 18: SausageIcon, 19: PozoleIcon, 20: CakeSliceIcon, 21: PassionFruitMousseIcon
+        };
+
+        const RecipeSpecificIcon = memo(({ recipe, className }) => {
+            const IconComponent = ICON_MAP[recipe.id] || GeraniumIcon;
+            return <IconComponent className={className} />;
+        });
+
         const CategoryIcon = memo(({ category, className, author }) => {
           if (author === "Papi Gonzalo") return <GrandpaHatIcon className={className} />;
           if (author === "Tía Lolita" || author === "Tía Teresita") return <ThreadIcon className={className} />;
           if (["Familia Rivera-Fierro", "Danny y Ana", "Lolita"].includes(author)) return <FamilyIcon className={className} />;
           if (author === "Magyta") return <DaisyIcon className={className} />;
-          
           switch (category) {
             case 'Harinas': return <WheatIcon className={className} />;
             case 'Sopas': return <SoupIcon className={className} />;
@@ -236,250 +281,6 @@
             case 'Bebidas': return <DrinkIcon className={className} />;
             default: return <GeraniumIcon className={className} />;
           }
-        });
-
-        // --- ICONOS ESPECÍFICOS DE RECETA (MEMOIZADOS) ---
-        const CornSackIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M25 85 Q25 95 35 95 H65 Q75 95 75 85 V45 Q75 25 50 25 Q25 25 25 45 Z" fill="#fde047" stroke="#b45309" strokeWidth="2"/>
-             <path d="M25 45 Q50 55 75 45" stroke="#b45309" strokeWidth="2" fill="none"/>
-             <path d="M35 25 L30 10 Q50 0 70 10 L65 25" fill="#fbbf24" stroke="#b45309"/>
-             <text x="50" y="75" fontSize="10" textAnchor="middle" fill="#b45309" fontWeight="bold" fontFamily="serif">MAÍZ</text>
-             <circle cx="40" cy="60" r="1.5" fill="#b45309"/>
-             <circle cx="60" cy="55" r="1.5" fill="#b45309"/>
-          </svg>
-        ));
-
-        const MachicaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M15 50 Q15 90 50 90 Q85 90 85 50 L90 45 L10 45 Z" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/>
-             <path d="M15 45 Q50 20 85 45" fill="#fcd34d" stroke="#b45309" strokeWidth="2"/>
-             <circle cx="40" cy="40" r="1.5" fill="#b45309" opacity="0.6"/>
-             <circle cx="60" cy="35" r="1.5" fill="#b45309" opacity="0.6"/>
-             <circle cx="50" cy="30" r="1.5" fill="#b45309" opacity="0.6"/>
-             <path d="M20 50 Q50 60 80 50" stroke="#c2410c" strokeWidth="1" fill="none" opacity="0.3"/>
-          </svg>
-        ));
-
-        const TamalIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M15 55 Q50 85 85 55 Q50 25 15 55 Z" fill="#bef264" stroke="#4d7c0f" strokeWidth="2"/>
-             <path d="M15 55 L85 55" stroke="#4d7c0f" strokeWidth="1" opacity="0.5"/>
-             <path d="M48 45 L52 65" stroke="#4d7c0f" strokeWidth="2"/>
-             <path d="M52 45 L48 65" stroke="#4d7c0f" strokeWidth="2"/>
-             <path d="M15 55 Q30 45 45 45" stroke="#4d7c0f" strokeWidth="1" fill="none" opacity="0.5"/>
-          </svg>
-        ));
-
-        const ChiguilIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M25 50 Q50 15 75 50 Q50 85 25 50 Z" fill="#fef08a" stroke="#d97706" strokeWidth="2"/>
-             <path d="M25 50 Q50 50 75 50" stroke="#d97706" strokeWidth="1" fill="none"/>
-             <path d="M25 50 Q35 30 50 30" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/>
-             <path d="M75 50 Q65 70 50 70" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.5"/>
-          </svg>
-        ));
-
-        const BunuelosIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <circle cx="35" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/>
-             <circle cx="65" cy="55" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/>
-             <circle cx="50" cy="35" r="16" fill="#fbbf24" stroke="#d97706" strokeWidth="2"/>
-             <path d="M50 15 Q50 35 35 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/> {/* Miel */}
-             <path d="M50 15 Q60 35 65 55" stroke="#713f12" strokeWidth="3" strokeLinecap="round" fill="none"/>
-             <circle cx="50" cy="15" r="3" fill="#713f12"/>
-          </svg>
-        ));
-
-        const TortillasIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <ellipse cx="50" cy="65" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/>
-             <ellipse cx="50" cy="55" rx="35" ry="12" fill="#fde047" stroke="#d97706" strokeWidth="2"/>
-             <ellipse cx="50" cy="45" rx="35" ry="12" fill="#fcd34d" stroke="#d97706" strokeWidth="2"/>
-             <path d="M30 45 Q40 50 50 45" stroke="#b45309" strokeWidth="2" opacity="0.6"/>
-             <path d="M60 42 Q65 48 70 42" stroke="#b45309" strokeWidth="2" opacity="0.6"/>
-          </svg>
-        ));
-
-        const CaldoBolasIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fdba74" stroke="#c2410c" strokeWidth="2"/>
-             <ellipse cx="50" cy="50" rx="35" ry="8" fill="#ffedd5" stroke="#c2410c" strokeWidth="2"/>
-             <circle cx="50" cy="45" r="14" fill="#fcd34d" stroke="#d97706" strokeWidth="1.5"/>
-             <circle cx="50" cy="45" r="4" fill="#fb923c" opacity="0.6"/> {/* Relleno */}
-             <path d="M35 48 Q40 52 45 48" stroke="#d97706" fill="none" opacity="0.5"/>
-          </svg>
-        ));
-
-        const ColadaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M30 30 L32 80 Q32 90 50 90 Q68 90 68 80 L70 30 Z" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/>
-             <ellipse cx="50" cy="30" rx="20" ry="5" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/>
-             <path d="M40 20 Q45 10 50 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/>
-             <path d="M55 20 Q60 10 65 20" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round"/>
-             <path d="M35 80 Q50 85 65 80" stroke="#d97706" strokeWidth="1" fill="none" opacity="0.3"/>
-          </svg>
-        ));
-
-        const FanescaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M15 50 Q15 90 50 90 Q85 90 85 50" fill="#fff7ed" stroke="#ea580c" strokeWidth="2"/>
-             <ellipse cx="50" cy="50" rx="35" ry="10" fill="#ffedd5" stroke="#ea580c" strokeWidth="2"/>
-             <path d="M35 45 Q50 35 65 45 Q50 55 35 45" fill="#94a3b8" stroke="#475569"/>
-             <circle cx="30" cy="52" r="3" fill="#bef264" stroke="#4d7c0f"/>
-             <circle cx="70" cy="48" r="3" fill="#fca5a5" stroke="#b91c1c"/>
-             <circle cx="50" cy="55" r="3" fill="#fcd34d" stroke="#d97706"/>
-          </svg>
-        ));
-
-        const TurkeyIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <ellipse cx="50" cy="60" rx="35" ry="25" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/>
-             <ellipse cx="50" cy="55" rx="25" ry="15" fill="#fcd34d" opacity="0.5"/>
-             <path d="M82 60 Q92 60 92 70 Q92 80 80 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/>
-             <path d="M18 60 Q8 60 8 70 Q8 80 20 75" fill="#fbbf24" stroke="#b45309" strokeWidth="2"/>
-             <path d="M35 50 Q50 35 65 50" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/>
-             <path d="M40 70 Q50 75 60 70" fill="none" stroke="#b45309" strokeWidth="2" opacity="0.5"/>
-          </svg>
-        ));
-
-        const HumitaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M25 35 L50 85 L75 35" fill="#bef264" stroke="#365314" strokeWidth="2"/>
-             <path d="M25 35 Q50 55 75 35" fill="#d9f99d" stroke="#365314" strokeWidth="2"/>
-             <path d="M40 60 L60 60" stroke="#365314" strokeWidth="2"/>
-             <path d="M50 60 L50 65" stroke="#365314" strokeWidth="2"/>
-          </svg>
-        ));
-
-        const QuimbolitoIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <rect x="25" y="35" width="50" height="35" rx="4" fill="#e0f2fe" stroke="#0284c7" strokeWidth="2"/>
-             <path d="M25 35 L50 55 L75 35" fill="#bae6fd" stroke="#0284c7" strokeWidth="1.5"/>
-             <path d="M50 55 L50 70" stroke="#0284c7" strokeWidth="1.5" strokeDasharray="3 2"/>
-             <circle cx="50" cy="45" r="2" fill="#0284c7" opacity="0.5"/>
-          </svg>
-        ));
-
-        const JuchoIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fce7f3" stroke="#be185d" strokeWidth="2"/>
-             <ellipse cx="50" cy="45" rx="30" ry="6" fill="#fbcfe8" stroke="#be185d" strokeWidth="2"/>
-             <circle cx="42" cy="50" r="5" fill="#4c0519" stroke="none"/>
-             <circle cx="58" cy="48" r="5" fill="#4c0519" stroke="none"/>
-             <circle cx="50" cy="55" r="6" fill="#fde047" stroke="#b45309"/>
-          </svg>
-        ));
-
-        const RiceIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <ellipse cx="50" cy="70" rx="40" ry="12" fill="#e5e7eb" stroke="#9ca3af" strokeWidth="2"/>
-             <path d="M30 65 Q50 30 70 65" fill="#fff" stroke="#d1d5db" strokeWidth="2"/>
-             <circle cx="50" cy="45" r="2" fill="#fbbf24"/>
-             <path d="M40 55 L50 45 L60 55" fill="none" stroke="#d1d5db" strokeWidth="1"/>
-          </svg>
-        ));
-
-        const PumpkinIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M20 45 Q20 85 50 85 Q80 85 80 45" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/>
-             <ellipse cx="50" cy="45" rx="30" ry="6" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/>
-             <rect x="42" y="40" width="8" height="8" fill="#fb923c" stroke="#c2410c"/>
-             <rect x="52" y="38" width="6" height="6" fill="#fb923c" stroke="#c2410c"/>
-          </svg>
-        ));
-
-        const ChichaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M35 30 L25 60 Q20 85 50 85 Q80 85 75 60 L65 30 Z" fill="#b45309" stroke="#78350f" strokeWidth="2"/>
-             <ellipse cx="50" cy="30" rx="15" ry="4" fill="#78350f"/>
-             <ellipse cx="50" cy="30" rx="13" ry="3" fill="#fcd34d"/>
-             <path d="M30 60 Q50 70 70 60" stroke="#fcd34d" strokeWidth="2" fill="none" strokeDasharray="3 3"/>
-          </svg>
-        ));
-
-        const CarlotaIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M30 80 L25 30 H75 L70 80 Q50 90 30 80 Z" fill="#fef9c3" stroke="#facc15" strokeWidth="2"/>
-             <ellipse cx="50" cy="30" rx="25" ry="5" fill="#fff" stroke="#facc15" strokeWidth="2"/>
-             <path d="M50 25 L50 10 L60 15 L50 25" fill="#4ade80" stroke="#166534"/>
-             <path d="M50 25 L50 10 L40 15 L50 25" fill="#4ade80" stroke="#166534"/>
-          </svg>
-        ));
-
-        const SausageIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M20 50 Q50 25 80 50 Q80 75 50 75 Q20 75 20 50" fill="#44403c" stroke="#1c1917" strokeWidth="2"/>
-             <path d="M25 50 Q50 35 75 50" stroke="#78716c" strokeWidth="2" fill="none" opacity="0.4"/>
-             <path d="M18 50 L12 50" stroke="#1c1917" strokeWidth="2"/>
-             <path d="M82 50 L88 50" stroke="#1c1917" strokeWidth="2"/>
-             <circle cx="30" cy="55" r="1" fill="#fff" opacity="0.3"/>
-             <circle cx="70" cy="60" r="1" fill="#fff" opacity="0.3"/>
-          </svg>
-        ));
-        
-        const PozoleIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M15 55 Q15 90 50 90 Q85 90 85 55 L90 50 L10 50 Z" fill="#b91c1c" stroke="#7f1d1d" strokeWidth="2"/>
-             <ellipse cx="50" cy="50" rx="35" ry="10" fill="#fecaca" stroke="#7f1d1d" strokeWidth="2"/>
-             <ellipse cx="50" cy="50" rx="30" ry="8" fill="#991b1b" opacity="0.9"/>
-             <circle cx="40" cy="52" r="4" fill="#fef08a"/>
-             <circle cx="60" cy="48" r="4" fill="#fef08a"/>
-             <path d="M35 30 Q40 20 45 30" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-             <path d="M50 25 Q55 15 60 25" stroke="#cbd5e1" strokeWidth="2" strokeLinecap="round" opacity="0.6"/>
-          </svg>
-        ));
-
-        const CakeSliceIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-             <path d="M20 40 L50 20 L80 40" fill="#fef3c7" stroke="#d97706" strokeWidth="2"/>
-             <path d="M20 40 L50 60 L80 40 L80 70 L50 90 L20 70 Z" fill="#fffbeb" stroke="#d97706" strokeWidth="2"/>
-             <path d="M20 50 L50 70 L80 50" fill="none" stroke="#d97706" strokeWidth="1" strokeDasharray="2 2"/>
-             <circle cx="50" cy="25" r="4" fill="#ef4444" stroke="#b91c1c"/>
-             <path d="M50 25 L55 15" stroke="#15803d" strokeWidth="1"/>
-          </svg>
-        ));
-
-        // Nuevo Icono: Mousse de Maracuyá (Copa)
-        const PassionFruitMousseIcon = memo(({ className }) => (
-          <svg viewBox="0 0 100 100" className={className} fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M30 30 L35 70 Q35 80 50 80 Q65 80 65 70 L70 30" fill="#fef9c3" stroke="#fbbf24" strokeWidth="2" opacity="0.9"/>
-            <path d="M50 80 V95 M35 95 H65" stroke="#fbbf24" strokeWidth="3" strokeLinecap="round"/>
-            <path d="M30 30 Q50 40 70 30" fill="#fff" stroke="#fbbf24" strokeWidth="1" opacity="0.6"/>
-            {/* Semillas */}
-            <circle cx="45" cy="25" r="2" fill="#000"/>
-            <circle cx="55" cy="22" r="2" fill="#000"/>
-            <circle cx="50" cy="28" r="2" fill="#000"/>
-            <path d="M35 25 Q50 10 65 25" fill="#fcd34d" stroke="none" opacity="0.8"/>
-          </svg>
-        ));
-
-        // --- HELPER SELECCIÓN DE ICONO ---
-        const RecipeSpecificIcon = memo(({ recipe, className }) => {
-            switch(recipe.id) {
-                case 1: return <CornSackIcon className={className} />;
-                case 2: return <MachicaIcon className={className} />;
-                case 3: return <TamalIcon className={className} />;
-                case 4: return <ChiguilIcon className={className} />;
-                case 5: return <BunuelosIcon className={className} />;
-                case 6: return <TortillasIcon className={className} />;
-                case 7: return <CaldoBolasIcon className={className} />;
-                case 8: return <ColadaIcon className={className} />;
-                case 9: return <FanescaIcon className={className} />;
-                case 10: return <TurkeyIcon className={className} />;
-                case 11: return <HumitaIcon className={className} />;
-                case 12: return <QuimbolitoIcon className={className} />;
-                case 13: return <JuchoIcon className={className} />;
-                case 14: return <RiceIcon className={className} />;
-                case 15: return <PumpkinIcon className={className} />;
-                case 16: return <ChichaIcon className={className} />;
-                case 17: return <CarlotaIcon className={className} />;
-                case 18: return <SausageIcon className={className} />;
-                case 19: return <PozoleIcon className={className} />;
-                case 20: return <CakeSliceIcon className={className} />;
-                case 21: return <PassionFruitMousseIcon className={className} />;
-                default: return <GeraniumIcon className={className} />;
-            }
         });
 
         // --- HELPER TEXTO ---
@@ -540,24 +341,67 @@
           useEffect(() => {
             window.scrollTo(0, 0);
           }, [view]);
+          
+          // NUEVO: Manejo del historial para el botón "Atrás" del celular
+          useEffect(() => {
+            const handlePopState = (event) => {
+              if (view === 'detail') {
+                setView('home');
+                setSelectedRecipe(null);
+              }
+            };
+
+            window.addEventListener('popstate', handlePopState);
+            return () => window.removeEventListener('popstate', handlePopState);
+          }, [view]);
 
           const handleRecipeClick = (recipe) => {
             setSelectedRecipe(recipe);
             setView('detail');
+            // Empujar estado al historial
+            window.history.pushState({ page: 'detail' }, '', '#receta');
           };
 
           const handleBackClick = () => {
-             setView('home');
-             setSelectedRecipe(null);
+             // Forzar el cambio de vista directamente
+             if (view !== 'home') {
+                 setView('home');
+                 setSelectedRecipe(null);
+             }
+          };
+          
+          const handleCopyLink = () => {
+            const link = "https://poisonedisa.github.io/Recetario-de-Mamita-Margarita/";
+            
+            const textArea = document.createElement("textarea");
+            textArea.value = link;
+            textArea.style.position = "fixed"; 
+            textArea.style.left = "-9999px";
+            document.body.appendChild(textArea);
+            textArea.focus();
+            textArea.select();
+            
+            try {
+                const successful = document.execCommand('copy');
+                const msg = successful ? '¡Enlace copiado!' : 'No se pudo copiar';
+                alert(msg);
+            } catch (err) {
+                console.error('Error al copiar', err);
+                alert("Error al copiar el enlace manualmente");
+            }
+            
+            document.body.removeChild(textArea);
           };
 
           const categories = ['Todos', 'Harinas', 'Sopas', 'Salados', 'Dulces', 'Bebidas'];
 
-          const filteredRecipes = recipesData.filter(recipe => {
-            const matchesCategory = filter === 'Todos' || recipe.category === filter;
-            const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
-            return matchesCategory && matchesSearch;
-          });
+          const filteredRecipes = useMemo(() => {
+            return recipesData.filter(recipe => {
+              const matchesCategory = filter === 'Todos' || recipe.category === filter;
+              const matchesSearch = recipe.title.toLowerCase().includes(searchTerm.toLowerCase());
+              return matchesCategory && matchesSearch;
+            });
+          }, [filter, searchTerm]);
 
           // Animaciones
           const fadeAnimation = "transition-opacity duration-1000 ease-in-out";
@@ -601,12 +445,133 @@
                     <span className="h-px w-12 bg-rose-300"></span>
                   </div>
 
-                  <p className="text-rose-500 text-[10px] font-bold tracking-widest uppercase animate-pulse font-sans mt-8">
-                    Familia Rivera-Fierro
-                  </p>
+                  {/* Espacio suficiente para evitar superposición */}
+                  <div className="mt-12">
+                      <p className="text-rose-500 text-[10px] font-bold tracking-widest uppercase animate-pulse font-sans">
+                        Familia Rivera-Fierro
+                      </p>
+                  </div>
                 </div>
               </div>
             );
+          }
+
+          // --- PANTALLA COMPARTIR (Full Page) ---
+          if (view === 'share') {
+             return (
+               <div className={`min-h-screen bg-rf-pattern ${fontBody} animate-fade-in relative overflow-hidden flex flex-col`}>
+                  
+                  {/* Header UNIFICADO */}
+                  <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex items-center">
+                    <button 
+                      onClick={handleBackClick}
+                      className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
+                    >
+                      <ArrowLeftIcon size={28} className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <span className={`ml-4 text-2xl text-rose-800 ${fontTitle}`}>Compartir</span>
+                  </div>
+                  
+                  <div className="flex-grow flex flex-col items-center justify-center p-6 text-center max-w-md mx-auto w-full z-10">
+                     <div className="bg-white/95 p-8 rounded-[2.5rem] shadow-xl border-2 border-rose-100 w-full relative overflow-hidden">
+                        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-rose-300 via-pink-300 to-rose-300"></div>
+
+                        <div className="mb-6 flex justify-center">
+                            <div className="bg-rose-50 p-6 rounded-full shadow-inner ring-4 ring-white">
+                               <ShareIcon size={40} className="text-rose-500" />
+                            </div>
+                        </div>
+                        
+                        <h2 className={`text-4xl text-rose-900 mb-4 ${fontTitle}`}>Compartir con Amor</h2>
+                        <p className="text-stone-500 mb-8 leading-relaxed">
+                           Comparte el sabor de nuestro hogar con quienes más quieres. Escanea para llevar las recetas contigo.
+                        </p>
+                        
+                        {/* Área para el Código QR (IMAGEN REAL) */}
+                        <div className="bg-white border-4 border-rose-50 rounded-3xl p-2 mb-8 flex flex-col items-center justify-center overflow-hidden shadow-sm mx-auto max-w-[200px]">
+                            <div className="w-full aspect-square bg-white rounded-2xl overflow-hidden">
+                               <img 
+                                 src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/156500899e88fdad35432fbc703bebe17b143116/qr_mamita_margarita.png?raw=true" 
+                                 alt="Código QR del Recetario"
+                                 className="w-full h-full object-contain"
+                               />
+                            </div>
+                        </div>
+                        
+                        <button onClick={handleCopyLink} className="w-full bg-rose-500 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-rose-600 transition-all active:scale-95 flex items-center justify-center gap-2">
+                            <span>Copiar Enlace</span>
+                        </button>
+                     </div>
+                     <p className="mt-8 text-rose-400 text-xs font-bold uppercase tracking-widest bg-white/50 px-4 py-1 rounded-full backdrop-blur-sm">Recetario Mamita Margarita</p>
+                  </div>
+               </div>
+             );
+          }
+
+          // --- PANTALLA CRÉDITOS (Full Page) ---
+          if (view === 'credits') {
+             return (
+               <div className={`min-h-screen bg-paper ${fontBody} animate-fade-in relative flex flex-col`}>
+                  {/* Header UNIFICADO */}
+                  <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex items-center">
+                    <button 
+                      onClick={handleBackClick}
+                      className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
+                    >
+                      <ArrowLeftIcon size={28} className="group-hover:-translate-x-1 transition-transform" />
+                    </button>
+                    <span className={`ml-4 text-2xl text-rose-800 ${fontTitle}`}>Nuestra Historia</span>
+                  </div>
+
+                  <div className="flex-grow p-6 max-w-lg mx-auto w-full pb-20">
+                      <div className="bg-white rounded-[2.5rem] p-10 shadow-lg border border-rose-100 text-center relative overflow-hidden mb-8">
+                         <GeraniumIcon className="w-32 h-32 mx-auto mb-6 opacity-80" />
+                         <h2 className={`text-5xl text-rose-900 mb-2 ${fontTitle} leading-tight`}>Un Legado<br/>de Sabor</h2>
+                         <div className="w-16 h-1 bg-rose-200 mx-auto my-6 rounded-full"></div>
+                         
+                         {/* Sección Dedicatoria */}
+                         <div className="relative mb-10">
+                             <div className="w-full aspect-[4/3] bg-stone-100 rounded-2xl mx-auto mb-6 border-4 border-white shadow-md flex items-center justify-center overflow-hidden ring-4 ring-rose-50 relative">
+                                {/* Placeholder Imagen - Cambiar src por la URL real */}
+                                <img 
+                                    src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/08afe4241c1a85d06b7ad38ca9523c683b45b693/mamita%20margarita%20y%20papito%20gonzalo.png?raw=true" 
+                                    alt="Abuelitos" 
+                                    className="w-full h-full object-cover object-top opacity-95 hover:scale-105 transition-transform duration-700"
+                                />
+                             </div>
+                             <p className={`text-xl text-stone-600 italic leading-relaxed ${fontBody} px-4`}>
+                                "Dedicado con amor para Mamita Margarita y Papi Gonzalo."
+                             </p>
+                             <div className="mt-6 flex justify-center">
+                                <HeartHandIcon size={32} className="text-rose-400" />
+                             </div>
+                         </div>
+                         
+                         {/* Créditos Detallados */}
+                         <div className="space-y-8 border-t border-rose-100 pt-8">
+                            <div className="space-y-1">
+                               <p className="text-xs text-rose-400 font-bold uppercase tracking-widest">Recetas de la</p>
+                               <p className={`text-3xl text-rose-800 ${fontTitle}`}>Familia Rivera-Fierro</p>
+                            </div>
+                            
+                            <div className="space-y-1">
+                               <p className="text-xs text-rose-400 font-bold uppercase tracking-widest">Idea Original</p>
+                               <p className={`text-3xl text-rose-800 ${fontTitle}`}>Margarita Rivera</p>
+                            </div>
+                            
+                            <div className="space-y-1">
+                               <p className="text-xs text-rose-400 font-bold uppercase tracking-widest">Creado con cariño por</p>
+                               <p className={`text-3xl text-rose-800 ${fontTitle}`}>Isaias Martinez</p>
+                            </div>
+                         </div>
+                      </div>
+                      
+                      <div className="text-center">
+                         <p className="text-[10px] text-stone-400 font-bold uppercase tracking-widest">© 2025 • Hecho a mano con ❤️</p>
+                      </div>
+                  </div>
+               </div>
+             );
           }
 
           // --- RECIPE DETAIL ---
@@ -777,7 +742,7 @@
               
               {/* Header Home */}
               <div className="bg-white rounded-b-[3.5rem] shadow-[0_10px_40px_-10px_rgba(0,0,0,0.03)] pt-14 pb-10 px-8 relative z-10">
-                <div className="flex justify-between items-start mb-10">
+                <div className="flex justify-between items-start mb-6">
                   <div>
                     <p className="text-rose-400 text-[10px] font-bold tracking-[0.25em] uppercase mb-3 font-sans">Recetario Familiar</p>
                     <h1 className={`text-5xl md:text-6xl text-rose-900 leading-[0.95] ${fontTitle} mb-3`}>
@@ -788,10 +753,14 @@
                        <p className="text-rose-500 text-[10px] font-bold tracking-widest uppercase font-sans">Familia Rivera-Fierro</p>
                     </div>
                   </div>
-                  <div className="bg-gradient-to-br from-rose-50 to-white p-2 rounded-full shadow-inner border border-rose-50">
-                     <div className="w-14 h-14 bg-white rounded-full flex items-center justify-center border border-rose-100 shadow-sm">
-                        <span className={`text-3xl text-rose-700 ${fontTitle}`}>M</span>
-                     </div>
+                  {/* Botones de acción en el header */}
+                  <div className="flex gap-3">
+                      <button onClick={() => setView('share')} className="p-3 bg-rose-50 rounded-full text-rose-500 hover:bg-rose-100 transition-colors shadow-sm active:scale-95">
+                         <ShareIcon size={22} />
+                      </button>
+                      <button onClick={() => setView('credits')} className="p-3 bg-rose-50 rounded-full text-rose-500 hover:bg-rose-100 transition-colors shadow-sm active:scale-95">
+                         <HeartHandIcon size={22} />
+                      </button>
                   </div>
                 </div>
 
@@ -882,6 +851,11 @@
                             <span className="text-[10px] font-bold uppercase tracking-wider text-rose-500 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
                               {recipe.category}
                             </span>
+                            {recipe.author === "Papi Gonzalo" && (
+                                <div className="bg-amber-100 px-2 py-0.5 rounded-full flex items-center gap-1 shadow-sm">
+                                    <span className="text-xs">🎩</span>
+                                </div>
+                            )}
                           </div>
                           
                           <h3 className={`text-rose-900 leading-[1.1] mb-3 capitalize ${isListView ? 'text-2xl' : 'text-3xl'} ${fontTitle} group-hover:text-rose-600 transition-colors`}>
