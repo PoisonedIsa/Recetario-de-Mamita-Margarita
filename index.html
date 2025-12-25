@@ -5,6 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Recetario de Mamita Margarita</title>
     
+    <!-- PRECARGA DE IMÁGENES CRÍTICAS (Optimización de Velocidad) -->
+    <!-- Esto descarga las imágenes inmediatamente al abrir la app -->
+    <link rel="preload" as="image" href="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/1bea94e09893ed3be7cb2ae3b048613143925a58/qr_mamita_margarita-_1_.webp?raw=true">
+    <link rel="preload" as="image" href="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/1bea94e09893ed3be7cb2ae3b048613143925a58/mamita-margarita-y-papito-gonzalo-_1_.webp?raw=true">
+
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
     
@@ -44,6 +49,7 @@
 
         @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
         .animate-spin-slow { animation: spin 20s linear infinite; }
+        .animate-spin-fast { animation: spin 1s linear infinite; }
 
         @keyframes fadeIn { 
             from { opacity: 0; transform: translateY(10px); } 
@@ -68,12 +74,48 @@
         const { useState, useEffect, useMemo, memo, useRef, useCallback } = React;
 
         // --- SISTEMA DE DISEÑO OPTIMIZADO ---
-        // Sombra más simple para mejor rendimiento en scroll
         const cardBaseStyle = "bg-white/95 rounded-3xl shadow-[0_2px_8px_rgba(0,0,0,0.04)] border border-stone-200 transition-transform duration-200 ease-out active:scale-[0.98] overflow-hidden relative layer-optimize";
         
         const fontTitle = "font-['Playfair_Display']"; 
         const fontBody = "font-['Lora']";             
         const fontScript = "font-['Great_Vibes']";    
+
+        // --- ENLACES DE IMAGENES (OPTIMIZADOS) ---
+        const IMG_QR = "https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/1bea94e09893ed3be7cb2ae3b048613143925a58/qr_mamita_margarita-_1_.webp?raw=true";
+        const IMG_ABUELITOS = "https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/1bea94e09893ed3be7cb2ae3b048613143925a58/mamita-margarita-y-papito-gonzalo-_1_.webp?raw=true";
+
+        // --- COMPONENTE IMAGEN CON CARGADOR (OPTIMIZADO) ---
+        const ImageWithLoader = memo(({ src, alt, className }) => {
+            const [loaded, setLoaded] = useState(false);
+            const [error, setError] = useState(false);
+            const imgRef = useRef();
+
+            useEffect(() => {
+                const img = imgRef.current;
+                if (img && img.complete) {
+                    setLoaded(true);
+                }
+            }, []);
+
+            return (
+                <div className={`relative ${className} bg-stone-50 overflow-hidden`}>
+                    {!loaded && !error && (
+                        <div className="absolute inset-0 flex items-center justify-center bg-stone-100/50">
+                            <div className="w-6 h-6 border-2 border-rose-200 border-t-rose-500 rounded-full animate-spin-fast"></div>
+                        </div>
+                    )}
+                    <img
+                        ref={imgRef}
+                        src={src}
+                        alt={alt}
+                        loading="eager" 
+                        className={`w-full h-full object-cover transition-opacity duration-300 ${loaded ? 'opacity-100' : 'opacity-0'}`}
+                        onLoad={() => setLoaded(true)}
+                        onError={() => setError(true)}
+                    />
+                </div>
+            );
+        });
 
         // --- ICONOS DE INTERFAZ (MEMOIZADOS) ---
         const ClockIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg> ));
@@ -86,6 +128,8 @@
         const ShareIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><circle cx="18" cy="5" r="3"></circle><circle cx="6" cy="12" r="3"></circle><circle cx="18" cy="19" r="3"></circle><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line></svg> ));
         const HeartHandIcon = memo(({ size = 24, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M19 14c1.49-1.28 3.6-2.34 4.58-2.74a2 2 0 0 0 1.24-2.57 2 2 0 0 0-2.6-1.2c-1.55.5-3.8 1.4-5.22 2.51"></path><path d="M22 6a3 3 0 1 0-6 0c0 1.66 1.12 3.01 2.5 3.5"></path><path d="M2.5 10.5C2.5 8 4.5 6 7 6a4.5 4.5 0 0 1 4 3 4.5 4.5 0 0 1 4-3c2.5 0 4.5 2 4.5 4.5 0 3.5-3.5 5.5-8.5 11C6 16 2.5 14 2.5 10.5Z"></path></svg> ));
         const ImageIcon = memo(({ size = 64, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className={className}><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg> ));
+        const LinkIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"></path><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"></path></svg> ));
+        const CheckIcon = memo(({ size = 20, className }) => ( <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className={className}><polyline points="20 6 9 17 4 12"></polyline></svg> ));
 
         // --- ICONOS DECORATIVOS BASE MEMOIZADOS ---
         const GeraniumIcon = memo(({ className }) => (
@@ -488,10 +532,10 @@
                         {/* Área para el Código QR (IMAGEN REAL) */}
                         <div className="bg-white border-4 border-rose-50 rounded-3xl p-2 mb-8 flex flex-col items-center justify-center overflow-hidden shadow-sm mx-auto max-w-[200px]">
                             <div className="w-full aspect-square bg-white rounded-2xl overflow-hidden">
-                               <img 
-                                 src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/156500899e88fdad35432fbc703bebe17b143116/qr_mamita_margarita.png?raw=true" 
+                               <ImageWithLoader 
+                                 src={IMG_QR}
                                  alt="Código QR del Recetario"
-                                 className="w-full h-full object-contain"
+                                 className="w-full h-full"
                                />
                             </div>
                         </div>
@@ -511,7 +555,7 @@
              return (
                <div className={`min-h-screen bg-paper ${fontBody} animate-fade-in relative flex flex-col`}>
                   {/* Header UNIFICADO */}
-                  <div className="sticky top-0 z-30 bg-white/90 backdrop-blur-md shadow-sm px-6 py-4 flex items-center">
+                  <div className="sticky top-0 z-30 p-6 flex items-center bg-white/80 backdrop-blur-sm shadow-sm mb-4">
                     <button 
                       onClick={handleBackClick}
                       className="p-3 -ml-2 rounded-full hover:bg-rose-50 text-rose-700 transition-colors active:scale-95 group"
@@ -530,9 +574,8 @@
                          {/* Sección Dedicatoria */}
                          <div className="relative mb-10">
                              <div className="w-full aspect-[4/3] bg-stone-100 rounded-2xl mx-auto mb-6 border-4 border-white shadow-md flex items-center justify-center overflow-hidden ring-4 ring-rose-50 relative">
-                                {/* Placeholder Imagen - Cambiar src por la URL real */}
-                                <img 
-                                    src="https://github.com/PoisonedIsa/Recetario-de-Mamita-Margarita/blob/08afe4241c1a85d06b7ad38ca9523c683b45b693/mamita%20margarita%20y%20papito%20gonzalo.png?raw=true" 
+                                <ImageWithLoader 
+                                    src={IMG_ABUELITOS} 
                                     alt="Abuelitos" 
                                     className="w-full h-full object-cover object-top opacity-95 hover:scale-105 transition-transform duration-700"
                                 />
